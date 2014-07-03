@@ -60,6 +60,7 @@ void Game::Initialize(HINSTANCE instance) {
 
 	CreateAppWindow();
 	InitGraphicsSystems();	
+	CreateDeviceResources();
 }
 
 void Game::InitGraphicsSystems() {
@@ -110,6 +111,11 @@ void Game::CreateAppWindow() {
 		windowStyle, x, y, width, height, HWND_DESKTOP, nullptr, m_instance,
 		reinterpret_cast<void*>(this));
 	assert(m_window != nullptr);
+
+	m_clientRect.left = 0;
+	m_clientRect.right = WINDOW_WIDTH;
+	m_clientRect.top = 0;
+	m_clientRect.bottom = WINDOW_HEIGHT;
 }
 
 void Game::RunMainLoop() {
@@ -144,6 +150,34 @@ void Game::Update(float ms) {
 	UNREFERENCED_PARAMETER(ms);
 }
 
-void Game::Render() {
+void Game::Render() {	
+	m_renderTarget->BeginDraw();
+	m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Black));
 
+	m_renderTarget->DrawLine(D2D1::Point2F(), D2D1::Point2F(50, 50), m_testBrush.Get());
+
+	if (m_renderTarget->EndDraw() == D2DERR_RECREATE_TARGET) {
+		CleanDeviceResources();
+		CreateDeviceResources();
+	}		
+}
+
+void Game::CreateDeviceResources() {
+	HRESULT hr;
+	hr = m_drawFactory->CreateHwndRenderTarget(
+		D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat(), 96.0f, 96.0f),
+		D2D1::HwndRenderTargetProperties(m_window, D2D1::SizeU(WINDOW_WIDTH, WINDOW_HEIGHT)),
+		m_renderTarget.ReleaseAndGetAddressOf());
+	assert(SUCCEEDED(hr));
+
+	Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> solidBrush;
+	assert(SUCCEEDED(
+		m_renderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), &solidBrush)
+		));
+	solidBrush.As(&m_testBrush);
+}
+
+void Game::CleanDeviceResources() {
+	m_testBrush = nullptr;
+	m_renderTarget = nullptr;
 }

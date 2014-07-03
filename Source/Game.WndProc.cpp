@@ -48,6 +48,8 @@ LRESULT Game::GameProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) 
 		Game* game = reinterpret_cast<Game*>(::GetWindowLongPtr(window, GWLP_USERDATA));
 
 		switch (message) {
+		case WM_PAINT:
+			return game->OnPaint();
 		case WM_CLOSE:
 			return game->OnClose();
 		case WM_DESTROY:
@@ -65,5 +67,10 @@ LRESULT Game::OnDestroy() {
 
 LRESULT Game::OnClose() {
 	::DestroyWindow(m_window);
+	return 0;
+}
+
+LRESULT Game::OnPaint() {	
+	::ValidateRect(m_window, &m_clientRect);
 	return 0;
 }

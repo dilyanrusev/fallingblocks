@@ -50,6 +50,7 @@ private:
 	static LRESULT CALLBACK GameProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam);
 	LRESULT OnDestroy();
 	LRESULT OnClose();
+	LRESULT OnPaint();
 
 	void Update(float ms);
 	void Render();
@@ -65,6 +66,7 @@ private:
 	const int BLOCKS_PER_WIDTH;
 	const int BLOCKS_PER_HEIGHT;
 		
+	RECT m_clientRect;
 	bool m_isClassRegistered;
 	HWND m_window;
 	HINSTANCE m_instance;
@@ -73,5 +75,6 @@ private:
 	Microsoft::WRL::ComPtr<IDWriteFactory> m_writeFactory;
 	Microsoft::WRL::ComPtr<IWICImagingFactory> m_imageFactory;
 	Microsoft::WRL::ComPtr<ID2D1HwndRenderTarget> m_renderTarget;
+	Microsoft::WRL::ComPtr<ID2D1Brush> m_testBrush;
 };
 
