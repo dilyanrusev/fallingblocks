@@ -59,24 +59,21 @@ void Game::Initialize(HINSTANCE instance) {
 	assert(::QueryPerformanceFrequency(&m_perfFrequency));
 
 	CreateAppWindow();
-	InitImaging();
-	InitWriting();
-	InitDrawing();
+	InitGraphicsSystems();	
 }
 
-void Game::InitImaging() {	
+void Game::InitGraphicsSystems() {
 	HRESULT hr = ::CoCreateInstance(CLSID_WICImagingFactory1, nullptr,
 		CLSCTX_INPROC_SERVER, __uuidof(m_imageFactory), 
 		reinterpret_cast<void**>(m_imageFactory.GetAddressOf()));
 	assert(SUCCEEDED(hr));
-}
 
-void Game::InitWriting() {
+	hr = ::DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(m_writeFactory), 
+		reinterpret_cast<IUnknown**>(m_writeFactory.GetAddressOf()));
+	assert(SUCCEEDED(hr));
 
-}
-
-void Game::InitDrawing() {
-
+	hr = ::D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, IID_PPV_ARGS(&m_drawFactory));
+	assert(SUCCEEDED(hr));
 }
 
 void Game::CreateAppWindow() {
