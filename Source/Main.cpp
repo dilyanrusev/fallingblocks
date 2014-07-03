@@ -1,6 +1,8 @@
 #include "stdafx.h"
-#include "Game.h"
 #include <exception>
+#include "Game.h"
+#include "Com.h"
+
 
 int APIENTRY wWinMain(HINSTANCE hInst, HINSTANCE hPrevInst, wchar_t* cmdLine, int cmdShow) {	
 	UNREFERENCED_PARAMETER(hPrevInst);
@@ -8,6 +10,7 @@ int APIENTRY wWinMain(HINSTANCE hInst, HINSTANCE hPrevInst, wchar_t* cmdLine, in
 	UNREFERENCED_PARAMETER(cmdShow);
 
 	try {
+		Com com;
 		Game game;
 		game.Initialize(hInst);
 		game.RunMainLoop();

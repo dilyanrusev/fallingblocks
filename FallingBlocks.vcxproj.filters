@@ -24,12 +24,18 @@
     <ClCompile Include="Source\Game.WndProc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Com.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Com.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

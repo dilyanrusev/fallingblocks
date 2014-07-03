@@ -15,6 +15,9 @@ private:
 	Game& operator=(const Game&);
 
 	void CreateAppWindow();
+	void InitImaging();
+	void InitWriting();
+	void InitDrawing();
 
 	static LRESULT CALLBACK GameProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam);
 	LRESULT OnDestroy();

@@ -29,8 +29,24 @@ void Game::Initialize(HINSTANCE instance) {
 	assert(::QueryPerformanceFrequency(&m_perfFrequency));
 
 	CreateAppWindow();
+	InitImaging();
+	InitWriting();
+	InitDrawing();
+}
 
-	
+void Game::InitImaging() {	
+	HRESULT hr = ::CoCreateInstance(CLSID_WICImagingFactory1, nullptr,
+		CLSCTX_INPROC_SERVER, __uuidof(m_imageFactory), 
+		reinterpret_cast<void**>(m_imageFactory.GetAddressOf()));
+	assert(SUCCEEDED(hr));
+}
+
+void Game::InitWriting() {
+
+}
+
+void Game::InitDrawing() {
+
 }
 
 void Game::CreateAppWindow() {
