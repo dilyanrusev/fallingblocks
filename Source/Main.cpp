@@ -1,12 +1,19 @@
 #include "stdafx.h"
-#include <Windows.h>
+#include "Game.h"
+#include <exception>
 
-int APIENTRY wWinMain(HINSTANCE hInst, HINSTANCE hPrevInst, wchar_t* cmdLine, int cmdShow) {
-	UNREFERENCED_PARAMETER(hInst);
+int APIENTRY wWinMain(HINSTANCE hInst, HINSTANCE hPrevInst, wchar_t* cmdLine, int cmdShow) {	
 	UNREFERENCED_PARAMETER(hPrevInst);
 	UNREFERENCED_PARAMETER(cmdLine);
 	UNREFERENCED_PARAMETER(cmdShow);
 
-	MessageBox(nullptr, L"Compiles", L"Falling Blocks", MB_OK);
-	return 0;
+	try {
+		Game game;
+		game.Initialize(hInst);
+		game.RunMainLoop();
+		return 0;
+	} catch (const std::exception& error) {
+		::MessageBoxA(nullptr, error.what(), "Falling Blocks Error", MB_OK);
+		return 1;
+	}
 }
