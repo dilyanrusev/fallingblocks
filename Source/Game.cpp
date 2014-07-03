@@ -55,7 +55,7 @@ void Game::CreateAppWindow() {
 	
 	DWORD windowStyle = WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU;
 	DWORD exStyle = 0;
-	RECT windowSize = { 0, 0, Game::WINDOW_WIDTH, Game::BLOCKS_PER_HEIGHT };
+	RECT windowSize = { 0, 0, Game::WINDOW_WIDTH, Game::WINDOW_HEIGHT };
 	assert(::AdjustWindowRectEx(&windowSize, windowStyle, FALSE, exStyle));
 
 	int width = windowSize.right - windowSize.left;
@@ -70,6 +70,12 @@ void Game::CreateAppWindow() {
 }
 
 void Game::RunMainLoop() {
+	assert(m_instance);
+	assert(m_window);
+
+	::ShowWindow(m_window, SW_SHOW);
+	::UpdateWindow(m_window);
+
 	MSG msg;
 	msg.message = WM_NULL;
 

@@ -17,6 +17,8 @@ private:
 	void CreateAppWindow();
 
 	static LRESULT CALLBACK GameProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam);
+	LRESULT OnDestroy();
+	LRESULT OnClose();
 
 	void Update(float ms);
 	void Render();
