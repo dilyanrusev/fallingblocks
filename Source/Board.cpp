@@ -31,6 +31,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "stdafx.h"
 #include "Board.h"
 #include <cassert>
+#include <algorithm>
+
+using namespace std;
 
 Board::Board()
 		: WIDTH(10)
@@ -40,16 +43,11 @@ Board::Board()
 		, m_currentX(0)
 		, m_currentY(0)		
 		, m_currentType(Tetrimono_Empty)
-		, m_randomDistributor(Tetrimono_I, Tetrimono_Z) {
-	for (int y = 0; y < HEIGHT; y++) {
-		for (int x = 0; x < WIDTH; x++) {
-			m_matrix[y][x] = Tetrimono_Empty;
-		}
-	}
-	
+		, m_randomDistributor(Tetrimono_I, Tetrimono_Z) {	
+	Empty(m_matrix);
 	m_nextType = static_cast<Tetrimonos>(m_randomDistributor(m_randomGenerator));
 	GetMatrixFor(m_nextType, m_next);
-	Empty(m_current);
+	SpawnNext();
 }
 
 Board::~Board() {
@@ -63,25 +61,29 @@ void Board::Empty(ArrayTetrimonos4x4& matrix) const {
 	}
 }
 
+void Board::Empty(ArrayTetrimonos10x20& matrix) const {
+	for (int y = 0; y < HEIGHT; y++) {
+		for (int x = 0; x < WIDTH; x++) {
+			matrix[y][x] = Tetrimono_Empty;
+		}
+	}
+}
+
 void Board::CleanBoardAtCurrent() {
 	int boardX, boardY;
 	for (int y = 0; y < MAX_TETRIMONO_HEIGHT; y++) {
 		for (int x = 0; x < MAX_TETRIMONO_WIDTH; x++) {
 			boardX = m_currentX + x;
 			boardY = m_currentY + y;
-			if (m_current[y][x] != Tetrimono_Empty) {
+			if (boardX >= 0 && boardY >= 0 && m_current[y][x] != Tetrimono_Empty) {
 				m_matrix[boardY][boardX] = Tetrimono_Empty;
 			}			
 		}
 	}
 }
 
-void Board::GetMatrixFor(Tetrimonos type, Board::ArrayTetrimonos4x4& matrix) const {
-	for (int y = 0; y < 4; y++) {
-		for (int x = 0; x < 4; x++) {
-			matrix[y][x] = Tetrimono_Empty;
-		}
-	}
+void Board::GetMatrixFor(Tetrimonos type, ArrayTetrimonos4x4& matrix) const {
+	Empty(matrix);
 	
 	switch (type) {
 	case Tetrimono_I:
@@ -176,8 +178,42 @@ void Board::Spawn(Tetrimonos type) {
 	m_currentY = -currentHeight;
 }
 
-void Board::SpawnNext() {
+bool Board::SpawnNext() {	
 	Spawn(m_nextType);
+	
+	ArrayTetrimonos10x20 merged;
+	bool success = MergeCurrent(merged);	
+	std::copy(begin(merged), end(merged), begin(m_matrix));
+	
 	m_nextType = static_cast<Tetrimonos>(m_randomDistributor(m_randomGenerator));
 	GetMatrixFor(m_nextType, m_next);
+	
+	return success;
+}
+
+bool Board::MergeCurrent(ArrayTetrimonos10x20& result) const {
+	bool confict = false;
+	std::copy(begin(m_matrix), end(m_matrix), begin(result));
+
+	int boardX, boardY;	
+
+	for (int y = 0; y < MAX_TETRIMONO_HEIGHT; y++) {
+		for (int x = 0; x < MAX_TETRIMONO_WIDTH; x++) {
+			boardX = m_currentX + x;
+			boardY = m_currentY + y;
+			if (boardX < 0 || boardY < 0) {
+				continue;
+			}
+
+			const Tetrimonos& source = m_current[y][x];
+			Tetrimonos& target = result[boardY][boardX];
+			
+			if (target == Tetrimono_Empty) {
+				target = source;
+			} else {
+				confict = true;
+			}
+		}
+	}
+	return confict;
 }

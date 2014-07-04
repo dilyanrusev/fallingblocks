@@ -50,7 +50,7 @@ public:
 	Board();
 	~Board();
 
-	void SpawnNext();
+	bool SpawnNext();
 	inline Tetrimonos GetAt(int x, int y) const {
 		return m_matrix[y][x];
 	}
@@ -65,7 +65,7 @@ public:
 
 private:
 	typedef std::array < std::array<Tetrimonos, 4>, 4 > ArrayTetrimonos4x4;
-	typedef std::array < std::array<Tetrimonos, 10>, 20 > ArrayTetrimonos20x10;
+	typedef std::array < std::array<Tetrimonos, 10>, 20 > ArrayTetrimonos10x20;
 
 	Board(const Board&);
 	Board& operator=(const Board&);
@@ -73,7 +73,9 @@ private:
 	void Spawn(Tetrimonos type);
 	void GetMatrixFor(Tetrimonos type, ArrayTetrimonos4x4& matrix) const;
 	void Empty(ArrayTetrimonos4x4& matrix) const;
+	void Empty(ArrayTetrimonos10x20& matrix) const;
 	void CleanBoardAtCurrent();
+	bool MergeCurrent(ArrayTetrimonos10x20& result) const;
 	void RotateClockwize();
 	void RotateAntiClockwize();
 	
@@ -84,7 +86,7 @@ private:
 	ArrayTetrimonos4x4 m_current;
 	ArrayTetrimonos4x4 m_next;
 
-	ArrayTetrimonos20x10 m_matrix;
+	ArrayTetrimonos10x20 m_matrix;
 
 	std::mt19937 m_randomGenerator;
 	std::uniform_int_distribution<int> m_randomDistributor;
