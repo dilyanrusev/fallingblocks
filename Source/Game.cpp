@@ -149,8 +149,18 @@ void Game::RunMainLoop() {
 	}
 }
 
+static bool wasSpaceDown = false;
+
 void Game::Update(float ms) {
 	UNREFERENCED_PARAMETER(ms);
+	if (::GetKeyState(VK_SPACE) < 0) {
+		if (!wasSpaceDown) {
+			m_board.SpawnNext();
+		} 
+		wasSpaceDown = true;
+	} else {
+		wasSpaceDown = false;
+	}
 }
 
 void Game::Render() {	
@@ -166,6 +176,21 @@ void Game::Render() {
 			dest.top = m_boardPos.y + static_cast<float>(y * BLOCK_HEIGHT);
 			dest.right = dest.left + BLOCK_WIDTH;
 			dest.bottom = dest.top + BLOCK_HEIGHT;
+			
+			m_renderTarget->DrawBitmap(bitmap.Get(), &dest, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
+		}
+	}
+
+	D2D1_POINT_2F nextOffset = D2D1::Point2F(m_boardPos.x + m_board.WIDTH * BLOCK_WIDTH + 30, m_boardPos.y);
+	for (int y = 0; y < m_board.MAX_TETRIMONO_HEIGHT; y++) {
+		for (int x = 0; x < m_board.MAX_TETRIMONO_WIDTH; x++) {
+			auto t = m_board.GetNextAt(x, y);
+			auto& bitmap = m_terimonoBitmaps[t];
+			dest.left = nextOffset.x + static_cast<float>(x * BLOCK_WIDTH);
+			dest.top = nextOffset.y + static_cast<float>(y * BLOCK_HEIGHT);
+			dest.right = dest.left + BLOCK_WIDTH;
+			dest.bottom = dest.top + BLOCK_HEIGHT;
+
 			m_renderTarget->DrawBitmap(bitmap.Get(), &dest, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
 		}
 	}

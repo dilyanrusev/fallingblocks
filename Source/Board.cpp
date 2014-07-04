@@ -185,4 +185,5 @@ void Board::Spawn(Tetrimonos type) {
 void Board::SpawnNext() {
 	Spawn(m_nextType);
 	m_nextType = static_cast<Tetrimonos>(m_randomDistributor(m_randomGenerator));
+	GetMatrixFor(m_nextType, m_next);
 }
