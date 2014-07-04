@@ -72,7 +72,7 @@ private:
 
 	void Spawn(Tetrimonos type);
 	void GetMatrixFor(Tetrimonos type, ArrayTetrimonos4x4& matrix) const;
-	void EmptyCurrent();
+	void Empty(ArrayTetrimonos4x4& matrix) const;
 	void CleanBoardAtCurrent();
 	void RotateClockwize();
 	void RotateAntiClockwize();

@@ -46,23 +46,19 @@ Board::Board()
 			m_matrix[y][x] = Tetrimono_Empty;
 		}
 	}
-
-	for (int y = 0; y < MAX_TETRIMONO_HEIGHT; y++) {
-		for (int x = 0; x < MAX_TETRIMONO_WIDTH; x++) {
-			m_current[y][x] = Tetrimono_Empty;
-		}
-	}
-
+	
 	m_nextType = static_cast<Tetrimonos>(m_randomDistributor(m_randomGenerator));
+	GetMatrixFor(m_nextType, m_next);
+	Empty(m_current);
 }
 
 Board::~Board() {
 }
 
-void Board::EmptyCurrent() {
+void Board::Empty(ArrayTetrimonos4x4& matrix) const {
 	for (int y = 0; y < MAX_TETRIMONO_HEIGHT; y++) {
 		for (int x = 0; x < MAX_TETRIMONO_WIDTH; x++) {
-			m_current[y][x] = Tetrimono_Empty;
+			matrix[y][x] = Tetrimono_Empty;
 		}
 	}
 }
@@ -137,8 +133,6 @@ void Board::GetMatrixFor(Tetrimonos type, Board::ArrayTetrimonos4x4& matrix) con
 }
 
 void Board::Spawn(Tetrimonos type) {
-	EmptyCurrent();
-
 	int currentWidth = 0;
 	int currentHeight = 0;
 	GetMatrixFor(type, m_current);
