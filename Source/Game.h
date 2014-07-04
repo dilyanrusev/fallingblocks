@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "stdafx.h"
+#include "Board.h"
 
 class Game {
 public:
@@ -71,6 +72,7 @@ private:
 	HWND m_window;
 	HINSTANCE m_instance;
 	LARGE_INTEGER m_perfFrequency;
+	Board m_board;
 	Microsoft::WRL::ComPtr<ID2D1Factory> m_drawFactory;
 	Microsoft::WRL::ComPtr<IDWriteFactory> m_writeFactory;
 	Microsoft::WRL::ComPtr<IWICImagingFactory> m_imageFactory;
