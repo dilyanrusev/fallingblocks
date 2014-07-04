@@ -58,14 +58,14 @@ private:
 	void CreateDeviceResources();
 	void CleanDeviceResources();
 
+	Microsoft::WRL::ComPtr<ID2D1Bitmap> LoadImage(const wchar_t* fileName) const;
+
 	const wchar_t* APP_TITLE;
 	const wchar_t* APP_CLASS;
 	const int WINDOW_WIDTH;
 	const int WINDOW_HEIGHT;
 	const int BLOCK_WIDTH;
 	const int BLOCK_HEIGHT;
-	const int BLOCKS_PER_WIDTH;
-	const int BLOCKS_PER_HEIGHT;
 		
 	RECT m_clientRect;
 	bool m_isClassRegistered;
@@ -73,10 +73,12 @@ private:
 	HINSTANCE m_instance;
 	LARGE_INTEGER m_perfFrequency;
 	Board m_board;
+	D2D1_POINT_2F m_boardPos;
 	Microsoft::WRL::ComPtr<ID2D1Factory> m_drawFactory;
 	Microsoft::WRL::ComPtr<IDWriteFactory> m_writeFactory;
 	Microsoft::WRL::ComPtr<IWICImagingFactory> m_imageFactory;
 	Microsoft::WRL::ComPtr<ID2D1HwndRenderTarget> m_renderTarget;
 	Microsoft::WRL::ComPtr<ID2D1Brush> m_testBrush;
+	Microsoft::WRL::ComPtr<ID2D1Bitmap> m_terimonoBitmaps[Count_Tetrimonos];
 };
 

@@ -33,8 +33,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cassert>
 
 Board::Board()
-		: WIDTH(20)
-		, HEIGHT(10)
+		: WIDTH(10)
+		, HEIGHT(20)
 		, MAX_TETRIMONO_WIDTH(4)
 		, MAX_TETRIMONO_HEIGHT(4)
 		, m_currentX(0)
@@ -155,4 +155,9 @@ void Board::Spawn(Tetrimonos type) {
 	m_currentType = type;	
 	m_currentX = (WIDTH - currentWidth) / 2;
 	m_currentY = -currentHeight;
+}
+
+Tetrimonos Board::GetAt(int x, int y) const {
+	assert(x < WIDTH && y < HEIGHT && x >= 0 && y >= 0);
+	return m_matrix[y][x];
 }

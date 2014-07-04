@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 enum Tetrimonos {
-	Tetrimono_Empty = -1,
+	Tetrimono_Empty,
 	Tetrimono_I,
 	Tetrimono_J,
 	Tetrimono_L,
@@ -46,6 +46,8 @@ class Board {
 public:
 	Board();
 	~Board();
+
+	Tetrimonos GetAt(int x, int y) const;
 
 	const int WIDTH;
 	const int HEIGHT;
@@ -67,6 +69,6 @@ private:
 	Tetrimonos m_currentType;
 	Tetrimonos m_current[4][4];
 
-	Tetrimonos m_matrix[10][20];
+	Tetrimonos m_matrix[20][10];
 };
 

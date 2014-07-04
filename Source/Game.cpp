@@ -32,15 +32,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Game.h"
 #include <cassert>
 
+using Microsoft::WRL::ComPtr;
+
 Game::Game()
 		: APP_TITLE(L"Falling Blocks")
 		, APP_CLASS(L"FallingBlocks")
 		, WINDOW_WIDTH(1280)
 		, WINDOW_HEIGHT(720)
-		, BLOCKS_PER_WIDTH(10)
-		, BLOCKS_PER_HEIGHT(20)
-		, BLOCK_WIDTH(50)
-		, BLOCK_HEIGHT(50)
+		, BLOCK_WIDTH(35)
+		, BLOCK_HEIGHT(35)
 		, m_isClassRegistered(false)
 		, m_window(nullptr)
 		, m_instance(nullptr) {
@@ -116,6 +116,9 @@ void Game::CreateAppWindow() {
 	m_clientRect.right = WINDOW_WIDTH;
 	m_clientRect.top = 0;
 	m_clientRect.bottom = WINDOW_HEIGHT;
+
+	m_boardPos.x = (WINDOW_WIDTH - m_board.WIDTH * BLOCK_WIDTH) / 2.0f;
+	m_boardPos.y = (WINDOW_HEIGHT - m_board.HEIGHT * BLOCK_HEIGHT) / 2.0f;
 }
 
 void Game::RunMainLoop() {
@@ -152,9 +155,20 @@ void Game::Update(float ms) {
 
 void Game::Render() {	
 	m_renderTarget->BeginDraw();
-	m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Black));
+	m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::AliceBlue));
 
-	m_renderTarget->DrawLine(D2D1::Point2F(), D2D1::Point2F(50, 50), m_testBrush.Get());
+	D2D1_RECT_F dest;	
+	for (int y = 0; y < m_board.HEIGHT; y++) {
+		for (int x = 0; x < m_board.WIDTH; x++) {
+			auto t = m_board.GetAt(x, y);
+			auto& bitmap = m_terimonoBitmaps[t];
+			dest.left = m_boardPos.x + static_cast<float>(x * BLOCK_WIDTH);
+			dest.top = m_boardPos.y + static_cast<float>(y * BLOCK_HEIGHT);
+			dest.right = dest.left + BLOCK_WIDTH;
+			dest.bottom = dest.top + BLOCK_HEIGHT;
+			m_renderTarget->DrawBitmap(bitmap.Get(), &dest, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
+		}
+	}
 
 	if (m_renderTarget->EndDraw() == D2DERR_RECREATE_TARGET) {
 		CleanDeviceResources();
@@ -175,7 +189,44 @@ void Game::CreateDeviceResources() {
 		m_renderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), &solidBrush)
 		));
 	solidBrush.As(&m_testBrush);
+
+	m_terimonoBitmaps[Tetrimono_Empty] = LoadImage(L"Assets/block_empty.png");
+	m_terimonoBitmaps[Tetrimono_I] = LoadImage(L"Assets/block_blue.png");
+	m_terimonoBitmaps[Tetrimono_J] = LoadImage(L"Assets/block_cyan.png");
+	m_terimonoBitmaps[Tetrimono_L] = LoadImage(L"Assets/block_green.png");
+	m_terimonoBitmaps[Tetrimono_O] = LoadImage(L"Assets/block_orange.png");
+	m_terimonoBitmaps[Tetrimono_S] = LoadImage(L"Assets/block_red.png");
+	m_terimonoBitmaps[Tetrimono_T] = LoadImage(L"Assets/block_violet.png");
+	m_terimonoBitmaps[Tetrimono_Z] = LoadImage(L"Assets/block_yellow.png");
 }
+
+ComPtr<ID2D1Bitmap> Game::LoadImage(const wchar_t* fileName) const {
+	ComPtr<IWICBitmapDecoder> decoder;
+	assert(SUCCEEDED(
+		m_imageFactory->CreateDecoderFromFilename(fileName, nullptr, GENERIC_READ, 
+			WICDecodeMetadataCacheOnDemand, &decoder)
+	));
+
+	ComPtr<IWICBitmapFrameDecode> frame;
+	assert(SUCCEEDED( decoder->GetFrame(0, &frame) ));
+
+	ComPtr<IWICFormatConverter> formatConverter;
+	assert(SUCCEEDED( m_imageFactory->CreateFormatConverter(&formatConverter) ));
+
+	assert(SUCCEEDED(
+		formatConverter->Initialize(frame.Get(), GUID_WICPixelFormat32bppPBGRA,
+			WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeCustom)
+	));
+
+
+	ComPtr<ID2D1Bitmap> bitmap;
+	assert(SUCCEEDED(
+		m_renderTarget->CreateBitmapFromWicBitmap(formatConverter.Get(), &bitmap)
+	));
+
+	return bitmap;
+}
+
 
 void Game::CleanDeviceResources() {
 	m_testBrush = nullptr;
