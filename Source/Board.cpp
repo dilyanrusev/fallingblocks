@@ -39,7 +39,8 @@ Board::Board()
 		, MAX_TETRIMONO_HEIGHT(4)
 		, m_currentX(0)
 		, m_currentY(0)		
-		, m_currentType(Tetrimono_Empty) {
+		, m_currentType(Tetrimono_Empty)
+		, m_randomDistributor(Tetrimono_I, Tetrimono_Z) {
 	for (int y = 0; y < HEIGHT; y++) {
 		for (int x = 0; x < WIDTH; x++) {
 			m_matrix[y][x] = Tetrimono_Empty;
@@ -51,6 +52,8 @@ Board::Board()
 			m_current[y][x] = Tetrimono_Empty;
 		}
 	}
+
+	m_nextType = static_cast<Tetrimonos>(m_randomDistributor(m_randomGenerator));
 }
 
 Board::~Board() {
@@ -77,76 +80,98 @@ void Board::CleanBoardAtCurrent() {
 	}
 }
 
+void Board::GetMatrixFor(Tetrimonos type, Board::ArrayTetrimonos4x4& matrix) const {
+	for (int y = 0; y < 4; y++) {
+		for (int x = 0; x < 4; x++) {
+			matrix[y][x] = Tetrimono_Empty;
+		}
+	}
+	
+	switch (type) {
+	case Tetrimono_I:
+		matrix[0][1] = type;
+		matrix[1][1] = type;
+		matrix[2][1] = type;
+		matrix[3][1] = type;	
+		break;
+	case Tetrimono_J:
+		matrix[0][2] = type;
+		matrix[1][2] = type;
+		matrix[2][2] = type;
+		matrix[2][1] = type;		
+		break;
+	case Tetrimono_L:
+		matrix[0][1] = type;
+		matrix[1][1] = type;
+		matrix[2][1] = type;
+		matrix[2][2] = type;		
+		break;
+	case Tetrimono_O:
+		matrix[0][1] = type;
+		matrix[0][2] = type;
+		matrix[1][1] = type;
+		matrix[1][2] = type;		
+		break;
+	case Tetrimono_S:
+		matrix[0][2] = type;
+		matrix[1][0] = type;
+		matrix[0][1] = type;
+		matrix[1][1] = type;		
+		break;
+	case Tetrimono_T:
+		matrix[0][0] = type;
+		matrix[0][1] = type;
+		matrix[0][2] = type;
+		matrix[1][1] = type;		
+		break;
+	case Tetrimono_Z:
+		matrix[0][0] = type;
+		matrix[0][1] = type;
+		matrix[1][1] = type;
+		matrix[1][2] = type;		
+		break;
+	default:
+		assert(false);
+		break;
+	}
+}
+
 void Board::Spawn(Tetrimonos type) {
 	EmptyCurrent();
 
 	int currentWidth = 0;
 	int currentHeight = 0;
+	GetMatrixFor(type, m_current);
 
 	switch (type) {
-	case Tetrimono_I:		
-		m_current[0][1] = type;
-		m_current[1][1] = type;
-		m_current[2][1] = type;
-		m_current[3][1] = type;
+	case Tetrimono_I:				
 		currentWidth = 1;
 		currentHeight = 4;
 		break;
-
-	case Tetrimono_J:
-		m_current[0][2] = type;
-		m_current[1][2] = type;
-		m_current[2][2] = type;
-		m_current[2][1] = type;
+	case Tetrimono_J:		
 		currentWidth = 2;
 		currentHeight = 3;
 		break;
-
-	case Tetrimono_L:
-		m_current[0][1] = type;
-		m_current[1][1] = type;
-		m_current[2][1] = type;
-		m_current[2][2] = type;
+	case Tetrimono_L:		
 		currentWidth = 2;
 		currentHeight = 3;
 		break;
-
 	case Tetrimono_O:
-		m_current[0][1] = type;
-		m_current[0][2] = type;
-		m_current[1][1] = type;
-		m_current[1][2] = type;
 		currentWidth = 2;
 		currentHeight = 2;
 		break;
-
-	case Tetrimono_S:
-		m_current[0][1] = type;
-		m_current[0][2] = type;
-		m_current[1][0] = type;
-		m_current[1][1] = type;
+	case Tetrimono_S:		
 		currentWidth = 3;
 		currentHeight = 2;
 		break;
-
-	case Tetrimono_T:
-		m_current[0][0] = type;
-		m_current[0][1] = type;
-		m_current[0][2] = type;
-		m_current[1][1] = type;
+	case Tetrimono_T:		
 		currentWidth = 3;
 		currentHeight = 2;
 		break;
-
-	case Tetrimono_Z:
-		m_current[0][0] = type;
-		m_current[0][1] = type;
-		m_current[1][1] = type;
-		m_current[1][2] = type;
+	case Tetrimono_Z:		
 		currentWidth = 3;
 		currentHeight = 2;
 		break;
-
 	default:
 		assert(false);
 		break;
@@ -157,7 +182,7 @@ void Board::Spawn(Tetrimonos type) {
 	m_currentY = -currentHeight;
 }
 
-Tetrimonos Board::GetAt(int x, int y) const {
-	assert(x < WIDTH && y < HEIGHT && x >= 0 && y >= 0);
-	return m_matrix[y][x];
+void Board::SpawnNext() {
+	Spawn(m_nextType);
+	m_nextType = static_cast<Tetrimonos>(m_randomDistributor(m_randomGenerator));
 }

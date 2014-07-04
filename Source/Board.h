@@ -30,8 +30,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include <random>
+#include <array>
+
 enum Tetrimonos {
-	Tetrimono_Empty,
+	Tetrimono_Empty,	
 	Tetrimono_I,
 	Tetrimono_J,
 	Tetrimono_L,
@@ -47,7 +50,13 @@ public:
 	Board();
 	~Board();
 
-	Tetrimonos GetAt(int x, int y) const;
+	void SpawnNext();
+	inline Tetrimonos GetAt(int x, int y) const {
+		return m_matrix[y][x];
+	}
+	inline Tetrimonos GetNextAt(int x, int y) const {
+		return m_next[y][x];
+	}
 
 	const int WIDTH;
 	const int HEIGHT;
@@ -55,10 +64,14 @@ public:
 	const int MAX_TETRIMONO_HEIGHT;
 
 private:
+	typedef std::array < std::array<Tetrimonos, 4>, 4 > ArrayTetrimonos4x4;
+	typedef std::array < std::array<Tetrimonos, 10>, 20 > ArrayTetrimonos20x10;
+
 	Board(const Board&);
 	Board& operator=(const Board&);
 
 	void Spawn(Tetrimonos type);
+	void GetMatrixFor(Tetrimonos type, ArrayTetrimonos4x4& matrix) const;
 	void EmptyCurrent();
 	void CleanBoardAtCurrent();
 	void RotateClockwize();
@@ -67,8 +80,13 @@ private:
 	int m_currentX;
 	int m_currentY;
 	Tetrimonos m_currentType;
-	Tetrimonos m_current[4][4];
+	Tetrimonos m_nextType;
+	ArrayTetrimonos4x4 m_current;
+	ArrayTetrimonos4x4 m_next;
 
-	Tetrimonos m_matrix[20][10];
+	ArrayTetrimonos20x10 m_matrix;
+
+	std::mt19937 m_randomGenerator;
+	std::uniform_int_distribution<int> m_randomDistributor;
 };
 
