@@ -178,21 +178,21 @@ void Board::Spawn(Tetrimonos type) {
 	m_currentY = -currentHeight;
 }
 
-bool Board::SpawnNext() {	
+MergeResult Board::SpawnNext() {
 	Spawn(m_nextType);
 	
 	ArrayTetrimonos10x20 merged;
-	bool success = MergeCurrent(merged);	
+	MergeResult mergeResult = MergeCurrent(merged);
 	std::copy(begin(merged), end(merged), begin(m_matrix));
 	
 	m_nextType = static_cast<Tetrimonos>(m_randomDistributor(m_randomGenerator));
 	GetMatrixFor(m_nextType, m_next);
 	
-	return success;
+	return mergeResult;
 }
 
-bool Board::MergeCurrent(ArrayTetrimonos10x20& result) const {
-	bool confict = false;
+MergeResult Board::MergeCurrent(ArrayTetrimonos10x20& result) const {
+	MergeResult mergeResult = MergeResult_OK;
 	std::copy(begin(m_matrix), end(m_matrix), begin(result));
 
 	int boardX, boardY;	
@@ -201,7 +201,11 @@ bool Board::MergeCurrent(ArrayTetrimonos10x20& result) const {
 		for (int x = 0; x < MAX_TETRIMONO_WIDTH; x++) {
 			boardX = m_currentX + x;
 			boardY = m_currentY + y;
-			if (boardX < 0 || boardY < 0) {
+			if (boardX < 0 || boardX >= WIDTH || boardY >= HEIGHT) {
+				mergeResult = MergeResult_Conflict;
+				continue;
+			} else if (boardY < 0) {
+				// going out from the top is not conflict by design
 				continue;
 			}
 
@@ -211,9 +215,22 @@ bool Board::MergeCurrent(ArrayTetrimonos10x20& result) const {
 			if (target == Tetrimono_Empty) {
 				target = source;
 			} else {
-				confict = true;
+				mergeResult = MergeResult_Conflict;
 			}
 		}
 	}
-	return confict;
+	return mergeResult;
+}
+
+MergeResult Board::MoveCurrentDown() {	
+	m_currentY++;
+	ArrayTetrimonos10x20 mergedMatrix;
+	MergeResult res = MergeCurrent(mergedMatrix);
+	if (res == MergeResult_OK) {
+		std::copy(begin(mergedMatrix), end(mergedMatrix), begin(m_matrix));
+	} else {
+		m_currentY--;
+	}
+
+	return res;
 }

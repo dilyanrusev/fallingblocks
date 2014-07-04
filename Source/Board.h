@@ -45,12 +45,18 @@ enum Tetrimonos {
 	Count_Tetrimonos
 };
 
+enum MergeResult {
+	MergeResult_Conflict,
+	MergeResult_OK
+};
+
 class Board {
 public:
 	Board();
 	~Board();
 
-	bool SpawnNext();
+	MergeResult SpawnNext();
+	MergeResult MoveCurrentDown();
 	inline Tetrimonos GetAt(int x, int y) const {
 		return m_matrix[y][x];
 	}
@@ -75,7 +81,7 @@ private:
 	void Empty(ArrayTetrimonos4x4& matrix) const;
 	void Empty(ArrayTetrimonos10x20& matrix) const;
 	void CleanBoardAtCurrent();
-	bool MergeCurrent(ArrayTetrimonos10x20& result) const;
+	MergeResult MergeCurrent(ArrayTetrimonos10x20& result) const;
 	void RotateClockwize();
 	void RotateAntiClockwize();
 	
