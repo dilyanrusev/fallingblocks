@@ -76,6 +76,8 @@ LRESULT Game::OnKeyDown(int vk) {
 		m_board.MoveCurrent(0, 1); break;
 	case VK_SPACE:
 		m_board.SpawnNext(); break;
+	case VK_ESCAPE:
+		::PostQuitMessage(0); break;
 	}
 	return 0;
 }
