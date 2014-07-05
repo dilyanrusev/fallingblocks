@@ -197,7 +197,7 @@ MergeResult Board::MergeCurrent(ArrayTetrimonos10x20& result) const {
 			
 			if (target == Tetrimono_Empty) {
 				target = source;
-			} else {
+			} else if (source != Tetrimono_Empty ) {
 				mergeResult = MergeResult_Conflict;
 			}
 		}
