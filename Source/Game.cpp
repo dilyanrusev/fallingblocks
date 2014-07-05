@@ -31,7 +31,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "stdafx.h"
 #include "Game.h"
 #include <cassert>
+#include <algorithm>
 
+using namespace std;
 using Microsoft::WRL::ComPtr;
 
 Game::Game()
@@ -44,6 +46,8 @@ Game::Game()
 		, m_isClassRegistered(false)
 		, m_window(nullptr)
 		, m_instance(nullptr) {
+	std::fill(begin(m_prevKeys), end(m_prevKeys), 0);
+	std::fill(begin(m_currentKeys), end(m_currentKeys), 0);
 }
 
 Game::~Game() {
@@ -149,18 +153,35 @@ void Game::RunMainLoop() {
 	}
 }
 
-static bool wasSpaceDown = false;
+bool Game::IsNewKeyPress(int virtualKey) const {
+	return !m_prevKeys[virtualKey] && m_currentKeys[virtualKey];
+}
 
 void Game::Update(float ms) {
 	UNREFERENCED_PARAMETER(ms);
-	if (::GetKeyState(VK_SPACE) < 0) {
-		if (!wasSpaceDown) {
-			m_board.SpawnNext();
-		} 
-		wasSpaceDown = true;
-	} else {
-		wasSpaceDown = false;
+	
+	/*
+	::GetKeyboardState(m_currentKeys);
+
+	if (IsNewKeyPress(VK_LEFT)) {
+		m_board.MoveCurrent(-1, 0);
+	} 
+	if (IsNewKeyPress(VK_RIGHT)) {
+		m_board.MoveCurrent(1, 0);
+	} 
+	if (IsNewKeyPress(VK_DOWN)) {
+		m_board.MoveCurrent(0, 1);
+	} 
+	if (IsNewKeyPress(VK_UP)) {
+		m_board.MoveCurrent(0, -1);
 	}
+
+	if (IsNewKeyPress(VK_SPACE)) {
+		m_board.SpawnNext();
+	}
+
+	std::copy(begin(m_currentKeys), end(m_currentKeys), begin(m_prevKeys));
+	*/
 }
 
 void Game::Render() {	

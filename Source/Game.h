@@ -46,12 +46,16 @@ private:
 	Game& operator=(const Game&);
 
 	void CreateAppWindow();
-	void InitGraphicsSystems();	
+	void InitGraphicsSystems();		
 
 	static LRESULT CALLBACK GameProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam);
 	LRESULT OnDestroy();
 	LRESULT OnClose();
 	LRESULT OnPaint();
+	LRESULT OnKeyDown(int vk);
+	LRESULT OnKeyUp(int vk);
+
+	bool IsNewKeyPress(int virtualKey) const;
 
 	void Update(float ms);
 	void Render();
@@ -67,6 +71,8 @@ private:
 	const int BLOCK_WIDTH;
 	const int BLOCK_HEIGHT;
 		
+	BYTE m_prevKeys[256];
+	BYTE m_currentKeys[256];
 	RECT m_clientRect;
 	bool m_isClassRegistered;
 	HWND m_window;

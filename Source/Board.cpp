@@ -69,20 +69,25 @@ void Board::Empty(ArrayTetrimonos10x20& matrix) const {
 	}
 }
 
-void Board::CleanBoardAtCurrent() {
+void Board::RemoveCurrentFromMatrix(ArrayTetrimonos10x20& matrix) const {
 	int boardX, boardY;
-	for (int y = 0; y < MAX_TETRIMONO_HEIGHT; y++) {
-		for (int x = 0; x < MAX_TETRIMONO_WIDTH; x++) {
+	for (int y = m_currentStartY; y <= m_currentEndY; y++) {
+		for (int x = m_currentStartX; x <= m_currentEndX; x++) {
 			boardX = m_currentX + x;
 			boardY = m_currentY + y;
-			if (boardX >= 0 && boardY >= 0 && m_current[y][x] != Tetrimono_Empty) {
-				m_matrix[boardY][boardX] = Tetrimono_Empty;
+			if (boardX >= 0 && boardY >= 0 && boardX < WIDTH && boardY < HEIGHT && m_current[y][x] != Tetrimono_Empty) {
+				matrix[boardY][boardX] = Tetrimono_Empty;
 			}			
 		}
 	}
 }
 
 void Board::GetMatrixFor(Tetrimonos type, ArrayTetrimonos4x4& matrix) const {
+	int ignore1 = 0, ignore2 = 0, ignore3 = 0, ignore4 = 0;
+	GetMatrixFor(type, matrix, ignore1, ignore2, ignore3, ignore4);
+}
+
+void Board::GetMatrixFor(Tetrimonos type, ArrayTetrimonos4x4& matrix, int& startX, int& endX, int& startY, int& endY) const {
 	Empty(matrix);
 	
 	switch (type) {
@@ -90,43 +95,57 @@ void Board::GetMatrixFor(Tetrimonos type, ArrayTetrimonos4x4& matrix) const {
 		matrix[0][1] = type;
 		matrix[1][1] = type;
 		matrix[2][1] = type;
-		matrix[3][1] = type;	
+		matrix[3][1] = type;
+		startX = 1; endX = 1;
+		startY = 0; endY = 3;
 		break;
 	case Tetrimono_J:
 		matrix[0][2] = type;
 		matrix[1][2] = type;
 		matrix[2][2] = type;
-		matrix[2][1] = type;		
+		matrix[2][1] = type;	
+		startX = 1; endX = 2;
+		startY = 0; endY = 2;
 		break;
 	case Tetrimono_L:
 		matrix[0][1] = type;
 		matrix[1][1] = type;
 		matrix[2][1] = type;
-		matrix[2][2] = type;		
+		matrix[2][2] = type;	
+		startX = 1; endX = 2;
+		startY = 0; endY = 2;
 		break;
 	case Tetrimono_O:
 		matrix[0][1] = type;
 		matrix[0][2] = type;
 		matrix[1][1] = type;
-		matrix[1][2] = type;		
+		matrix[1][2] = type;	
+		startX = 1; endX = 2;
+		startY = 0; endY = 1;
 		break;
 	case Tetrimono_S:
 		matrix[0][2] = type;
 		matrix[1][0] = type;
 		matrix[0][1] = type;
-		matrix[1][1] = type;		
+		matrix[1][1] = type;	
+		startX = 0; endX = 2;
+		startY = 0; endY = 1;
 		break;
 	case Tetrimono_T:
 		matrix[0][0] = type;
 		matrix[0][1] = type;
 		matrix[0][2] = type;
 		matrix[1][1] = type;		
+		startX = 0; endX = 2;
+		startY = 0; endY = 1;
 		break;
 	case Tetrimono_Z:
 		matrix[0][0] = type;
 		matrix[0][1] = type;
 		matrix[1][1] = type;
-		matrix[1][2] = type;		
+		matrix[1][2] = type;
+		startX = 0; endX = 2;
+		startY = 0; endY = 1;
 		break;
 	default:
 		assert(false);
@@ -134,54 +153,19 @@ void Board::GetMatrixFor(Tetrimonos type, ArrayTetrimonos4x4& matrix) const {
 	}
 }
 
-void Board::Spawn(Tetrimonos type) {
-	int currentWidth = 0;
-	int currentHeight = 0;
-	GetMatrixFor(type, m_current);
-
-	switch (type) {
-	case Tetrimono_I:				
-		currentWidth = 1;
-		currentHeight = 4;
-		break;
-	case Tetrimono_J:		
-		currentWidth = 2;
-		currentHeight = 3;
-		break;
-	case Tetrimono_L:		
-		currentWidth = 2;
-		currentHeight = 3;
-		break;
-	case Tetrimono_O:
-		currentWidth = 2;
-		currentHeight = 2;
-		break;
-	case Tetrimono_S:		
-		currentWidth = 3;
-		currentHeight = 2;
-		break;
-	case Tetrimono_T:		
-		currentWidth = 3;
-		currentHeight = 2;
-		break;
-	case Tetrimono_Z:		
-		currentWidth = 3;
-		currentHeight = 2;
-		break;
-	default:
-		assert(false);
-		break;
-	}
+void Board::Spawn(Tetrimonos type) {	
+	GetMatrixFor(type, m_current, m_currentStartX, m_currentEndX, m_currentStartY, m_currentEndY);
 
 	m_currentType = type;	
-	m_currentX = (WIDTH - currentWidth) / 2;
-	m_currentY = -currentHeight;
+	m_currentX = (WIDTH - (m_currentEndX - m_currentStartX + 1)) / 2;
+	m_currentY = -(m_currentEndY - m_currentStartY + 1);
 }
 
 MergeResult Board::SpawnNext() {
 	Spawn(m_nextType);
 	
 	ArrayTetrimonos10x20 merged;
+	std::copy(begin(m_matrix), end(m_matrix), begin(merged));
 	MergeResult mergeResult = MergeCurrent(merged);
 	std::copy(begin(merged), end(merged), begin(m_matrix));
 	
@@ -193,12 +177,11 @@ MergeResult Board::SpawnNext() {
 
 MergeResult Board::MergeCurrent(ArrayTetrimonos10x20& result) const {
 	MergeResult mergeResult = MergeResult_OK;
-	std::copy(begin(m_matrix), end(m_matrix), begin(result));
 
 	int boardX, boardY;	
 
-	for (int y = 0; y < MAX_TETRIMONO_HEIGHT; y++) {
-		for (int x = 0; x < MAX_TETRIMONO_WIDTH; x++) {
+	for (int y = m_currentStartY; y <= m_currentEndY; y++) {
+		for (int x = m_currentStartX; x <= m_currentEndX; x++) {
 			boardX = m_currentX + x;
 			boardY = m_currentY + y;
 			if (boardX < 0 || boardX >= WIDTH || boardY >= HEIGHT) {
@@ -222,14 +205,19 @@ MergeResult Board::MergeCurrent(ArrayTetrimonos10x20& result) const {
 	return mergeResult;
 }
 
-MergeResult Board::MoveCurrentDown() {	
-	m_currentY++;
+MergeResult Board::MoveCurrent(int deltaX, int deltaY) {
 	ArrayTetrimonos10x20 mergedMatrix;
+	std::copy(begin(m_matrix), end(m_matrix), begin(mergedMatrix));
+	RemoveCurrentFromMatrix(mergedMatrix);
+	
+	m_currentX += deltaX;
+	m_currentY += deltaY;
 	MergeResult res = MergeCurrent(mergedMatrix);
 	if (res == MergeResult_OK) {
 		std::copy(begin(mergedMatrix), end(mergedMatrix), begin(m_matrix));
 	} else {
-		m_currentY--;
+		m_currentX -= deltaX;
+		m_currentY -= deltaY;
 	}
 
 	return res;

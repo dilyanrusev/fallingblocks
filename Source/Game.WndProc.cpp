@@ -54,10 +54,35 @@ LRESULT Game::GameProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) 
 			return game->OnClose();
 		case WM_DESTROY:
 			return game->OnDestroy();
+		case WM_KEYDOWN:
+			return game->OnKeyDown(static_cast<int>(wparam));
+		case WM_KEYUP:
+			return game->OnKeyUp(static_cast<int>(wparam));
 		default:
 			return ::DefWindowProc(window, message, wparam, lparam);
 		}
 	}
+}
+
+LRESULT Game::OnKeyDown(int vk) {
+	switch (vk) {
+	case VK_LEFT: 
+		m_board.MoveCurrent(-1, 0); break;
+	case VK_RIGHT:
+		m_board.MoveCurrent(1, 0); break;
+	case VK_UP:
+		m_board.MoveCurrent(0, -1); break;
+	case VK_DOWN:
+		m_board.MoveCurrent(0, 1); break;
+	case VK_SPACE:
+		m_board.SpawnNext(); break;
+	}
+	return 0;
+}
+
+LRESULT Game::OnKeyUp(int vk) {
+	UNREFERENCED_PARAMETER(vk);
+	return 0;
 }
 
 LRESULT Game::OnDestroy() {
