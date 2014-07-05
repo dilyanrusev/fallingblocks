@@ -55,8 +55,6 @@ private:
 	LRESULT OnKeyDown(int vk);
 	LRESULT OnKeyUp(int vk);
 
-	bool IsNewKeyPress(int virtualKey) const;
-
 	void Update(float ms);
 	void Render();
 	void CreateDeviceResources();
@@ -69,10 +67,8 @@ private:
 	const int WINDOW_WIDTH;
 	const int WINDOW_HEIGHT;
 	const int BLOCK_WIDTH;
-	const int BLOCK_HEIGHT;
-		
-	BYTE m_prevKeys[256];
-	BYTE m_currentKeys[256];
+	const int BLOCK_HEIGHT;		
+	
 	RECT m_clientRect;
 	bool m_isClassRegistered;
 	HWND m_window;
