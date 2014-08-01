@@ -148,6 +148,7 @@ void Game::RunMainLoop() {
 
 		Update(elapsedInMs);
 		Render();
+		before = now;
 	}
 }
 
