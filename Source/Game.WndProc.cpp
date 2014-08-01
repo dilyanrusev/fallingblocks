@@ -71,11 +71,11 @@ LRESULT Game::OnKeyDown(int vk) {
 	case VK_RIGHT:
 		m_board.MoveCurrent(1, 0); break;
 	case VK_UP:
-		m_board.MoveCurrent(0, -1); break;
+		m_board.RotateAntiClockwize(); break;
 	case VK_DOWN:
-		m_board.MoveCurrent(0, 1); break;
+		m_board.RotateClockwize(); break;
 	case VK_SPACE:
-		m_board.SpawnNext(); break;
+		m_board.FallDown(); break;
 	case VK_ESCAPE:
 		::PostQuitMessage(0); break;
 	}

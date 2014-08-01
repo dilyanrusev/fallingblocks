@@ -82,6 +82,27 @@ void Board::Update(float ms) {
 	}
 }
 
+void Board::RotateAntiClockwize() {
+
+}
+
+void Board::RotateClockwize() {
+
+}
+
+void Board::FallDown() {
+	if (m_isGameOver) {
+		return;
+	}
+
+	MergeResult fallResult;
+	do {
+		fallResult = MoveCurrent(0, 1);
+	} while (fallResult != MergeResult_Conflict);
+	SpawnNext();
+	m_isFirstFallAfterSpawn = true;
+}
+
 void Board::Empty(ArrayTetrimonos4x4& matrix) const {
 	for (int y = 0; y < MAX_TETRIMONO_HEIGHT; y++) {
 		for (int x = 0; x < MAX_TETRIMONO_WIDTH; x++) {

@@ -55,9 +55,12 @@ public:
 	Board();
 	~Board();
 
-	void Update(float ms);
-	MergeResult SpawnNext();
+	void Update(float ms);	
 	MergeResult MoveCurrent(int deltaX, int deltaY);
+	void RotateClockwize();
+	void RotateAntiClockwize();
+	void FallDown();
+	
 	inline Tetrimonos GetAt(int x, int y) const {
 		return m_matrix[y][x];
 	}
@@ -81,14 +84,14 @@ private:
 	Board& operator=(const Board&);
 
 	void Spawn(Tetrimonos type);
+	MergeResult SpawnNext();
 	void GetMatrixFor(Tetrimonos type, ArrayTetrimonos4x4& matrix, int& startX, int& endX, int& startY, int& endY) const;
 	void GetMatrixFor(Tetrimonos type, ArrayTetrimonos4x4& matrix) const;
 	void Empty(ArrayTetrimonos4x4& matrix) const;
 	void Empty(ArrayTetrimonos10x20& matrix) const;
 	void RemoveCurrentFromMatrix(ArrayTetrimonos10x20& matrix) const;
 	MergeResult MergeCurrent(ArrayTetrimonos10x20& result) const;
-	void RotateClockwize();
-	void RotateAntiClockwize();	
+	
 	
 	int m_currentX;
 	int m_currentY;
