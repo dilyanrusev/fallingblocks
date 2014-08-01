@@ -45,7 +45,7 @@ Board::Board()
 		, m_currentY(0)		
 		, m_currentType(Tetrimono_Empty)
 		, m_randomDistributor(Tetrimono_I, Tetrimono_Z)
-		, m_timeBetweenFall(10000)
+		, m_timeBetweenFall(500)
 		, m_elapsedSinceLastFall(0)
 		, m_isFirstFallAfterSpawn(true)
 		, m_isGameOver(false) {	
