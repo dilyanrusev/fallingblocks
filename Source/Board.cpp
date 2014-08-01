@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Board.h"
 #include <cassert>
 #include <algorithm>
+#include "Log.h"
 
 using namespace std;
 
@@ -43,7 +44,11 @@ Board::Board()
 		, m_currentX(0)
 		, m_currentY(0)		
 		, m_currentType(Tetrimono_Empty)
-		, m_randomDistributor(Tetrimono_I, Tetrimono_Z) {	
+		, m_randomDistributor(Tetrimono_I, Tetrimono_Z)
+		, m_timeBetweenFall(10000)
+		, m_elapsedSinceLastFall(0)
+		, m_isFirstFallAfterSpawn(true)
+		, m_isGameOver(false) {	
 	Empty(m_matrix);
 	m_nextType = static_cast<Tetrimonos>(m_randomDistributor(m_randomGenerator));
 	GetMatrixFor(m_nextType, m_next);
@@ -51,6 +56,30 @@ Board::Board()
 }
 
 Board::~Board() {
+}
+
+void Board::Update(float ms) {
+	if (m_isGameOver) {
+		return;
+	}
+
+	m_elapsedSinceLastFall += ms;
+	Log("elaped = %f; ms = %f\n", m_elapsedSinceLastFall, ms);
+	if (m_elapsedSinceLastFall >= m_timeBetweenFall) {
+		m_elapsedSinceLastFall = 0;		
+		MergeResult fallResult = MoveCurrent(0, 1);
+		if (fallResult == MergeResult_Conflict) {
+			if (!m_isFirstFallAfterSpawn) {
+				SpawnNext();
+				m_isFirstFallAfterSpawn = true;
+			}
+			else {
+				m_isGameOver = true;
+			}
+		} else {
+			m_isFirstFallAfterSpawn = false;
+		}
+	}
 }
 
 void Board::Empty(ArrayTetrimonos4x4& matrix) const {

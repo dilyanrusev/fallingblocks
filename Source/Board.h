@@ -55,6 +55,7 @@ public:
 	Board();
 	~Board();
 
+	void Update(float ms);
 	MergeResult SpawnNext();
 	MergeResult MoveCurrent(int deltaX, int deltaY);
 	inline Tetrimonos GetAt(int x, int y) const {
@@ -62,6 +63,9 @@ public:
 	}
 	inline Tetrimonos GetNextAt(int x, int y) const {
 		return m_next[y][x];
+	}
+	inline bool IsGameOver() const {
+		return m_isGameOver;
 	}
 
 	const int WIDTH;
@@ -96,6 +100,10 @@ private:
 	Tetrimonos m_nextType;
 	ArrayTetrimonos4x4 m_current;
 	ArrayTetrimonos4x4 m_next;
+	float m_elapsedSinceLastFall;
+	float m_timeBetweenFall;
+	bool m_isGameOver;
+	bool m_isFirstFallAfterSpawn;
 
 	ArrayTetrimonos10x20 m_matrix;
 

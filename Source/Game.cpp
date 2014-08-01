@@ -152,7 +152,7 @@ void Game::RunMainLoop() {
 }
 
 void Game::Update(float ms) {
-	UNREFERENCED_PARAMETER(ms);
+	m_board.Update(ms);
 }
 
 void Game::Render() {	
