@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Log.cpp" />
     <ClCompile Include="Source\Board.cpp" />
     <ClCompile Include="Source\Com.cpp" />
     <ClCompile Include="Source\Game.cpp" />
@@ -18,6 +19,7 @@
     <ClCompile Include="Source\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Log.h" />
     <ClInclude Include="Source\Board.h" />
     <ClInclude Include="Source\Com.h" />
     <ClInclude Include="Source\Game.h" />
