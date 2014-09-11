@@ -30,8 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "stdafx.h"
-#include "Board.h"
+#include <memory>
 
 class Game {
 public:

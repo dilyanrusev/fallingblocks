@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef WIN32
 
 #include "Game.h"
+#include "Board.h"
 #include <cassert>
 #include "SDL.h"
 
@@ -44,6 +45,7 @@ struct Game::Impl {
 	bool m_isSdlInitialized;
 	SDL_Window* m_window;
 	SDL_Renderer* m_renderer;
+	Board m_board;
 
 	Impl()
 			: m_isSdlInitialized(false) 
@@ -62,6 +64,9 @@ struct Game::Impl {
 	}
 
 	void Initialize();
+	void RunGameLoop();
+	void Update(float ms);
+	void Render();
 };
 
 Game::Game()
@@ -100,7 +105,43 @@ void Game::Impl::Initialize() {
 
 void Game::RunMainLoop() {
 	printf("%s\n", "Running main loop...");
-	assert(m_impl->m_isSdlInitialized);
+	m_impl->RunGameLoop();
+}
+
+void Game::Impl::RunGameLoop() {
+	assert(m_isSdlInitialized);
+	assert(m_window);
+	assert(m_renderer);
+
+	SDL_Event event;
+	event.type = 0;
+
+	Uint64 before, now, frequency;
+	float elapsedInMs;
+
+	frequency = ::SDL_GetPerformanceFrequency();
+	before = ::SDL_GetPerformanceCounter();
+	while (event.type != SDL_QUIT) {
+		while (::SDL_PollEvent(&event)) {			
+		}
+
+		now = ::SDL_GetPerformanceCounter();
+		elapsedInMs = static_cast<float>((now - before) * 1000 / frequency);
+
+		Update(elapsedInMs);
+		Render();
+		before = now;
+	}
+}
+
+void Game::Impl::Update(float ms) {
+	m_board.Update(ms);
+}
+
+void Game::Impl::Render() {
+	assert( ::SDL_RenderClear(m_renderer) == 0 );
+
+	::SDL_RenderPresent(m_renderer);
 }
 
 #endif
