@@ -116,17 +116,16 @@ void Game::Impl::RunGameLoop() {
 	SDL_Event event;
 	event.type = 0;
 
-	Uint64 before, now, frequency;
+	Uint32 before, now;
 	float elapsedInMs;
 
-	frequency = ::SDL_GetPerformanceFrequency();
-	before = ::SDL_GetPerformanceCounter();
+	before = ::SDL_GetTicks();
 	while (event.type != SDL_QUIT) {
 		while (::SDL_PollEvent(&event)) {			
 		}
 
-		now = ::SDL_GetPerformanceCounter();
-		elapsedInMs = static_cast<float>((now - before) * 1000 / frequency);
+		now = ::SDL_GetTicks();
+		elapsedInMs = static_cast<float>(now - before);
 
 		Update(elapsedInMs);
 		Render();
