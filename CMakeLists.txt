@@ -10,6 +10,8 @@ ADD_EXECUTABLE(fallingblocks
 	Source/Com.cpp 
 	Source/Log.cpp 
 	Source/Main.cpp
+	Source/Board.cpp
+	Source/Game.Linux.cpp
 )
  
 INCLUDE(FindPkgConfig)
