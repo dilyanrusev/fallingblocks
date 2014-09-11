@@ -29,6 +29,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #pragma once
 
-void IntializeLog();
+void InitializeLog();
 void Log(const char* msg, ...);
 void CloseLog();

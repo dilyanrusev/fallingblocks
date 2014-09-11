@@ -69,7 +69,7 @@ void Board::Update(float ms) {
 	}
 
 	m_elapsedSinceLastFall += ms;
-	Log("elaped = %f; ms = %f\n", m_elapsedSinceLastFall, ms);
+	//Log("elaped = %f; ms = %f\n", m_elapsedSinceLastFall, ms);
 	if (m_elapsedSinceLastFall >= m_timeBetweenFall) {
 		m_elapsedSinceLastFall = 0;		
 		MergeResult fallResult = MoveCurrent(0, 1);

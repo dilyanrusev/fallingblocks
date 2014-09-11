@@ -32,8 +32,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Game.h"
 #include "Board.h"
+#include "Log.h"
 
 #include "SDL.h"
+#include "SDL_image.h"
 #include <cassert>
 #include <algorithm>
 
@@ -48,6 +50,7 @@ static const char* APP_TITLE = "Falling Blocks";
 
 struct Game::Impl {
 	bool m_isSdlInitialized;
+	bool m_isImgInitialized;
 	SDL_Window* m_window;
 	SDL_Renderer* m_renderer;
 	Board m_board;
@@ -55,24 +58,20 @@ struct Game::Impl {
 
 	Impl()
 			: m_isSdlInitialized(false) 
+			, m_isImgInitialized(false)
 			, m_window(nullptr)
 			, m_renderer(nullptr) {
+		InitializeLog();
 		std::fill(begin(m_terimonos), end(m_terimonos), nullptr);
 	}
 
-	~Impl() {
-		if (!m_isSdlInitialized) return;
-
-		if (m_renderer) ::SDL_DestroyRenderer(m_renderer);
-		if (m_window) ::SDL_DestroyWindow(m_window);
-
-		::SDL_Quit();
-	}
+	~Impl();
 
 	void Initialize();
 	void RunGameLoop();
 	void Update(float ms);
 	void Render();
+	void LoadTextures();
 	SDL_Texture* LoadTexture(const char* path);
 };
 
@@ -94,7 +93,7 @@ void Game::Impl::Initialize() {
 	assert(!m_isSdlInitialized);
 
 	assert( ::SDL_Init(SDL_INIT_VIDEO) == 0);
-	m_isSdlInitialized = true;
+	m_isSdlInitialized = true;	
 
 	m_window = ::SDL_CreateWindow(
 		APP_TITLE,
@@ -108,10 +107,44 @@ void Game::Impl::Initialize() {
 
 	m_renderer = ::SDL_CreateRenderer(m_window,	-1,	0);
 	assert(m_renderer);
+
+	assert( ::IMG_Init(IMG_INIT_PNG) == IMG_INIT_PNG );
+	m_isImgInitialized = true;
+
+	LoadTextures();
+}
+
+void Game::Impl::LoadTextures() {
+	m_terimonos[Tetrimono_Empty] = LoadTexture("Assets/block_empty.png");
+	m_terimonos[Tetrimono_I] = LoadTexture("Assets/block_blue.png");
+	m_terimonos[Tetrimono_J] = LoadTexture("Assets/block_cyan.png");
+	m_terimonos[Tetrimono_L] = LoadTexture("Assets/block_green.png");
+	m_terimonos[Tetrimono_O] = LoadTexture("Assets/block_orange.png");
+	m_terimonos[Tetrimono_S] = LoadTexture("Assets/block_red.png");
+	m_terimonos[Tetrimono_T] = LoadTexture("Assets/block_violet.png");
+	m_terimonos[Tetrimono_Z] = LoadTexture("Assets/block_yellow.png");
+}
+
+Game::Impl::~Impl() {
+	if (!m_isSdlInitialized) return;
+
+	if (m_isImgInitialized) {
+		for (auto tex: m_terimonos) {
+			if (tex) ::SDL_DestroyTexture(tex);
+		}
+
+		::IMG_Quit();
+	}
+
+	if (m_renderer) ::SDL_DestroyRenderer(m_renderer);
+	if (m_window) ::SDL_DestroyWindow(m_window);		
+
+	::SDL_Quit();
+	CloseLog();
 }
 
 void Game::RunMainLoop() {
-	printf("%s\n", "Running main loop...");
+	Log("%s\n", "Running main loop...");
 	m_impl->RunGameLoop();
 }
 
@@ -151,7 +184,23 @@ void Game::Impl::Render() {
 }
 
 SDL_Texture* Game::Impl::LoadTexture(const char* path) {
-	return nullptr;
+	SDL_Surface* inMem = ::IMG_Load(path);
+	if (!inMem) {
+		Log("LoadTexture(\"%s\"): %s\n", path, IMG_GetError());
+		return nullptr;
+	}
+
+	SDL_Texture* inGpu = ::SDL_CreateTextureFromSurface(
+		m_renderer, inMem);
+	
+	::SDL_FreeSurface(inMem);
+
+	if (!inGpu) {
+		Log("LoadTexture(\"%s\"): %s\n", path, SDL_GetError());
+		return nullptr;
+	}
+
+	return inGpu;
 }
 
 #endif
