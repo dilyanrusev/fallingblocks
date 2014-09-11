@@ -32,8 +32,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Game.h"
 #include "Board.h"
-#include <cassert>
+
 #include "SDL.h"
+#include <cassert>
+#include <algorithm>
+
+using std::begin;
+using std::end;
 
 static const int WINDOW_WIDTH = 1280;
 static const int WINDOW_HEIGHT = 720;
@@ -46,12 +51,13 @@ struct Game::Impl {
 	SDL_Window* m_window;
 	SDL_Renderer* m_renderer;
 	Board m_board;
+	SDL_Texture* m_terimonos[Count_Tetrimonos];
 
 	Impl()
 			: m_isSdlInitialized(false) 
 			, m_window(nullptr)
 			, m_renderer(nullptr) {
-
+		std::fill(begin(m_terimonos), end(m_terimonos), nullptr);
 	}
 
 	~Impl() {
@@ -67,6 +73,7 @@ struct Game::Impl {
 	void RunGameLoop();
 	void Update(float ms);
 	void Render();
+	SDL_Texture* LoadTexture(const char* path);
 };
 
 Game::Game()
@@ -141,6 +148,10 @@ void Game::Impl::Render() {
 	assert( ::SDL_RenderClear(m_renderer) == 0 );
 
 	::SDL_RenderPresent(m_renderer);
+}
+
+SDL_Texture* Game::Impl::LoadTexture(const char* path) {
+	return nullptr;
 }
 
 #endif
