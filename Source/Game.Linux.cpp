@@ -74,6 +74,7 @@ struct Game::Impl {
 	void Update(float ms);
 	void Render();
 	void LoadTextures();
+	bool HandleKeyboardEvents(const SDL_Event& event);
 	SDL_Texture* LoadTexture(const char* path);
 };
 
@@ -167,10 +168,12 @@ void Game::Impl::RunGameLoop() {
 
 	Uint32 before, now;
 	float elapsedInMs;
+	bool running = true;
 
 	before = ::SDL_GetTicks();
-	while (event.type != SDL_QUIT) {
-		while (::SDL_PollEvent(&event)) {			
+	while (running && event.type != SDL_QUIT) {
+		while (::SDL_PollEvent(&event)) {	
+			running = HandleKeyboardEvents(event);
 		}
 
 		now = ::SDL_GetTicks();
@@ -180,6 +183,30 @@ void Game::Impl::RunGameLoop() {
 		Render();
 		before = now;
 	}
+}
+
+bool Game::Impl::HandleKeyboardEvents(const SDL_Event& event) {
+	bool running = true;
+
+	if (event.type != SDL_KEYDOWN) return running;
+
+	switch (event.key.keysym.sym) {
+	case SDLK_LEFT:
+		m_board.MoveCurrent(-1, 0); break;
+	case SDLK_RIGHT:
+		m_board.MoveCurrent(1, 0); break;
+	case SDLK_UP:
+		m_board.MoveCurrent(0, -1); break;
+	case SDLK_DOWN:
+		m_board.MoveCurrent(0, 1); break;
+	case SDLK_SPACE:
+		m_board.SpawnNext(); break;
+	case SDLK_ESCAPE:
+		running = false; break;
+	default: break;
+	}
+
+	return running;
 }
 
 void Game::Impl::Update(float ms) {
