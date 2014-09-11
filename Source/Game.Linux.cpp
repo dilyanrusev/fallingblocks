@@ -55,6 +55,8 @@ struct Game::Impl {
 	SDL_Renderer* m_renderer;
 	Board m_board;
 	SDL_Texture* m_terimonos[Count_Tetrimonos];
+	SDL_Rect m_boardPos;
+	SDL_Rect m_nextOffset;
 
 	Impl()
 			: m_isSdlInitialized(false) 
@@ -108,10 +110,17 @@ void Game::Impl::Initialize() {
 	m_renderer = ::SDL_CreateRenderer(m_window,	-1,	0);
 	assert(m_renderer);
 
+	::SDL_SetRenderDrawColor(m_renderer, 240, 248, 255, 255);
+
 	assert( ::IMG_Init(IMG_INIT_PNG) == IMG_INIT_PNG );
 	m_isImgInitialized = true;
 
 	LoadTextures();
+
+	m_boardPos.x = (WINDOW_WIDTH - m_board.WIDTH * BLOCK_WIDTH) / 2;
+	m_boardPos.y = (WINDOW_HEIGHT - m_board.HEIGHT * BLOCK_HEIGHT) / 2;
+	m_nextOffset.x = m_boardPos.x + m_board.WIDTH * BLOCK_WIDTH + 30;
+	m_nextOffset.y = m_boardPos.y;
 }
 
 void Game::Impl::LoadTextures() {
@@ -179,6 +188,34 @@ void Game::Impl::Update(float ms) {
 
 void Game::Impl::Render() {
 	assert( ::SDL_RenderClear(m_renderer) == 0 );
+
+	SDL_Rect dest;
+	dest.w = BLOCK_WIDTH;
+	dest.h = BLOCK_HEIGHT;
+	for (int y = 0; y < m_board.HEIGHT; y++) {
+		for (int x = 0; x < m_board.WIDTH; x++) {
+			Tetrimonos type = m_board.GetAt(x, y);
+			SDL_Texture* texture = m_terimonos[type];
+			dest.x = m_boardPos.x + x * BLOCK_WIDTH;
+			dest.y = m_boardPos.y + y * BLOCK_HEIGHT;
+
+			::SDL_RenderCopy(m_renderer,
+				texture, nullptr, &dest);
+		}
+	}	
+	
+	for (int y = 0; y < m_board.MAX_TETRIMONO_HEIGHT; y++) {
+		for (int x = 0; x < m_board.MAX_TETRIMONO_WIDTH; x++) {
+			Tetrimonos type = m_board.GetNextAt(x, y);
+			SDL_Texture* texture = m_terimonos[type];
+
+			dest.x = m_nextOffset.x + x * BLOCK_WIDTH;
+			dest.y = m_nextOffset.y + y * BLOCK_HEIGHT;
+
+			::SDL_RenderCopy(m_renderer,
+				texture, nullptr, &dest);
+		}
+	}
 
 	::SDL_RenderPresent(m_renderer);
 }
