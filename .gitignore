@@ -1,5 +1,6 @@
 Debug/
 Release/
+bin/
 ipch/
 *.opensdf
 *.sdf

@@ -29,18 +29,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "stdafx.h"
 #include "Com.h"
-#include <cassert>
 
 Com::Com()
 		: m_initialized(false) {
+
+#ifdef WIN32
 	HRESULT hr = ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 	assert(SUCCEEDED(hr));
+#endif
 	m_initialized = true;
 }
 
 
 Com::~Com() {
+#ifdef WIN32
 	if (m_initialized) {
 		::CoUninitialize();
 	}
+#endif
 }

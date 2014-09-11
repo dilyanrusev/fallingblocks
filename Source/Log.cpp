@@ -50,5 +50,9 @@ void Log(const char* msg, ...) {
 	va_start(args, msg);
 	vsnprintf(buffer, 1024, msg, args);
 
+#ifdef WIN32
 	OutputDebugStringA(buffer);
+#else
+	fprintf(stdout, "%s\n", buffer);
+#endif
 }

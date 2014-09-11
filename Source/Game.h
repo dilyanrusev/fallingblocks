@@ -38,7 +38,7 @@ public:
 	Game();
 	~Game();
 
-	void Initialize(HINSTANCE instance);
+	void Initialize();
 	void RunMainLoop();
 
 private:	

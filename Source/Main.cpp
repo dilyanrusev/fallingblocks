@@ -31,7 +31,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "stdafx.h"
 #include <exception>
 #include "Game.h"
+
+
 #include "Com.h"
+
+#ifdef WIN32
 
 #pragma comment(lib, "D2d1.lib")
 #pragma comment(lib, "Dwrite.lib")
@@ -40,6 +44,12 @@ int APIENTRY wWinMain(HINSTANCE hInst, HINSTANCE hPrevInst, wchar_t* cmdLine, in
 	UNREFERENCED_PARAMETER(hPrevInst);
 	UNREFERENCED_PARAMETER(cmdLine);
 	UNREFERENCED_PARAMETER(cmdShow);
+
+#else
+
+int main(int argc, char** argv) {
+
+#endif
 
 	try {
 		Com com;

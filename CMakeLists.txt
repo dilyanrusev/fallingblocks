@@ -1,0 +1,18 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+ 
+PROJECT(fallingblocks)
+ 
+ADD_DEFINITIONS(
+    -std=c++11 
+)
+
+ADD_EXECUTABLE(fallingblocks 
+	Source/Com.cpp 
+	Source/Log.cpp 
+	Source/Main.cpp
+)
+ 
+INCLUDE(FindPkgConfig)
+PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
+INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(fallingblocks ${SDL2_LIBRARIES})
