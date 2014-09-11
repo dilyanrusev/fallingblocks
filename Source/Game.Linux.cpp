@@ -31,10 +31,37 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef WIN32
 
 #include "Game.h"
+#include <cassert>
+#include "SDL.h"
 
+static const int WINDOW_WIDTH = 1280;
+static const int WINDOW_HEIGHT = 720;
+static const int BLOCK_WIDTH = 35;
+static const int BLOCK_HEIGHT = 35;	
+static const char* APP_TITLE = "Falling Blocks";
 
 struct Game::Impl {
+	bool m_isSdlInitialized;
+	SDL_Window* m_window;
+	SDL_Renderer* m_renderer;
 
+	Impl()
+			: m_isSdlInitialized(false) 
+			, m_window(nullptr)
+			, m_renderer(nullptr) {
+
+	}
+
+	~Impl() {
+		if (!m_isSdlInitialized) return;
+
+		if (m_renderer) ::SDL_DestroyRenderer(m_renderer);
+		if (m_window) ::SDL_DestroyWindow(m_window);
+
+		::SDL_Quit();
+	}
+
+	void Initialize();
 };
 
 Game::Game()
@@ -43,15 +70,37 @@ Game::Game()
 }
 
 Game::~Game() {
-
+	
 }
 
 void Game::Initialize() {
 	printf("%s\n", "Initialize...");
+	m_impl->Initialize();
+}
+
+void Game::Impl::Initialize() {
+	assert(!m_isSdlInitialized);
+
+	assert( ::SDL_Init(SDL_INIT_VIDEO) == 0);
+	m_isSdlInitialized = true;
+
+	m_window = ::SDL_CreateWindow(
+		APP_TITLE,
+		SDL_WINDOWPOS_CENTERED,
+		SDL_WINDOWPOS_CENTERED,
+		WINDOW_WIDTH,
+		WINDOW_HEIGHT,
+		0
+	);
+	assert(m_window);
+
+	m_renderer = ::SDL_CreateRenderer(m_window,	-1,	0);
+	assert(m_renderer);
 }
 
 void Game::RunMainLoop() {
 	printf("%s\n", "Running main loop...");
+	assert(m_impl->m_isSdlInitialized);
 }
 
 #endif

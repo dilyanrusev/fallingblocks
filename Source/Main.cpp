@@ -48,6 +48,8 @@ int APIENTRY wWinMain(HINSTANCE hInst, HINSTANCE hPrevInst, wchar_t* cmdLine, in
 
 #else
 
+#include "SDL.h"
+
 int main(int argc, char** argv) {
 
 #endif

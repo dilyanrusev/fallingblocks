@@ -38,8 +38,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <dwrite.h>
 #include <wrl.h>
 
-#else
-
-#include <SDL2/SDL.h>
-
 #endif
