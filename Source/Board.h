@@ -58,6 +58,8 @@ public:
 	void Update(float ms);
 	MergeResult SpawnNext();
 	MergeResult MoveCurrent(int deltaX, int deltaY);
+	MergeResult RotateClockwize();
+	MergeResult RotateAntiClockwize();
 	inline Tetrimonos GetAt(int x, int y) const {
 		return m_matrix[y][x];
 	}

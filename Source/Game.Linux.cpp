@@ -196,9 +196,9 @@ bool Game::Impl::HandleKeyboardEvents(const SDL_Event& event) {
 	case SDLK_RIGHT:
 		m_board.MoveCurrent(1, 0); break;
 	case SDLK_UP:
-		m_board.MoveCurrent(0, -1); break;
+		m_board.RotateAntiClockwize(); break;
 	case SDLK_DOWN:
-		m_board.MoveCurrent(0, 1); break;
+		m_board.RotateClockwize(); break;
 	case SDLK_SPACE:
 		m_board.SpawnNext(); break;
 	case SDLK_ESCAPE:

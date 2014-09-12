@@ -297,3 +297,10 @@ void Board::FindBorders(const ArrayTetrimonos4x4& matrix, int& startX, int& endX
 	}
 }
 
+MergeResult Board::RotateClockwize() {
+	return MergeResult_Conflict;
+}
+
+MergeResult Board::RotateAntiClockwize() {
+	return MergeResult_Conflict;
+}
