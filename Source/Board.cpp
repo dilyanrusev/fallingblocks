@@ -256,3 +256,44 @@ MergeResult Board::MoveCurrent(int deltaX, int deltaY) {
 
 	return res;
 }
+
+void Board::RotateCurrentMatrixClockwize(ArrayTetrimonos4x4& result, int& startX, int& endX, int& startY, int& endY) const {
+	for (int y = 0; y < HEIGHT; y++) {
+		for (int x = 0; x < WIDTH; x++) {
+			result[y][x] = m_current[x][HEIGHT - y - 1];
+		}
+	}
+	
+
+	FindBorders(result, startX, endX, startY, endY);
+}
+
+void Board::RotateCurrentMatrixAntiClockwize(ArrayTetrimonos4x4& result, int& startX, int& endX, int& startY, int& endY) const {
+	for (int y = 0; y < HEIGHT; y++) {
+		for (int x = 0; x < WIDTH; x++) {
+			result[y][x] = m_current[WIDTH - x - 1][y];
+		}
+	}
+	
+
+	FindBorders(result, startX, endX, startY, endY);
+}
+
+void Board::FindBorders(const ArrayTetrimonos4x4& matrix, int& startX, int& endX, int& startY, int& endY) const {
+	startX = WIDTH - 1;
+	startY = HEIGHT - 1;
+	endX = 0;
+	endY = 0;
+
+	for (int y = 0; y < HEIGHT; y++) {
+		for (int x = 0; x < WIDTH; x++) {
+			if (matrix[y][x] != Tetrimono_Empty) {
+				startX = std::min(startX, x);
+				startY = std::min(startY, y);
+				endX = std::max(endX, x);
+				endY = std::max(endY, y);
+			}
+		}
+	}
+}
+

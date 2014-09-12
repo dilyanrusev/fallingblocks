@@ -87,8 +87,9 @@ private:
 	void Empty(ArrayTetrimonos10x20& matrix) const;
 	void RemoveCurrentFromMatrix(ArrayTetrimonos10x20& matrix) const;
 	MergeResult MergeCurrent(ArrayTetrimonos10x20& result) const;
-	void RotateClockwize();
-	void RotateAntiClockwize();	
+	void RotateCurrentMatrixClockwize(ArrayTetrimonos4x4& result, int& startX, int& endX, int& startY, int& endY) const;
+	void RotateCurrentMatrixAntiClockwize(ArrayTetrimonos4x4& result, int& startX, int& endX, int& startY, int& endY) const;
+	void FindBorders(const ArrayTetrimonos4x4& matrix, int& startX, int& endX, int& startY, int& endY) const;
 	
 	int m_currentX;
 	int m_currentY;
