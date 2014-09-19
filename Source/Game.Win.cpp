@@ -41,7 +41,7 @@ using namespace std;
 using Microsoft::WRL::ComPtr;
 
 struct Game::Impl {
-	Impl();
+	Impl(Game* parent);
 	~Impl();
 
 	void CreateAppWindow();
@@ -71,6 +71,7 @@ struct Game::Impl {
 	const int BLOCK_WIDTH;
 	const int BLOCK_HEIGHT;		
 	
+	Game* m_parent;
 	RECT m_clientRect;
 	bool m_isClassRegistered;
 	HWND m_window;
@@ -86,13 +87,14 @@ struct Game::Impl {
 	ComPtr<ID2D1Bitmap> m_terimonoBitmaps[Count_Tetrimonos];
 };
 
-Game::Impl::Impl() 
+Game::Impl::Impl(Game* parent) 
 		: APP_TITLE(L"Falling Blocks")
 		, APP_CLASS(L"FallingBlocks")
 		, WINDOW_WIDTH(1280)
 		, WINDOW_HEIGHT(720)
 		, BLOCK_WIDTH(35)
 		, BLOCK_HEIGHT(35)
+		, m_parent(parent)
 		, m_isClassRegistered(false)
 		, m_window(nullptr)
 		, m_instance(nullptr) {
@@ -105,7 +107,7 @@ Game::Impl::~Impl() {
 }
 
 Game::Game()
-		: m_impl(new Impl()) {
+		: m_impl(new Impl(this)) {
 }
 
 Game::~Game() {	
@@ -171,7 +173,7 @@ void Game::Impl::CreateAppWindow() {
 
 	m_window = ::CreateWindowExW(exStyle, APP_CLASS, APP_TITLE,
 		windowStyle, x, y, width, height, HWND_DESKTOP, nullptr, m_instance,
-		reinterpret_cast<void*>(this));
+		reinterpret_cast<void*>(m_parent));
 	assert(m_window != nullptr);
 
 	m_clientRect.left = 0;
