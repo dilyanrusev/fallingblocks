@@ -342,5 +342,5 @@ void Board::RotateCurrentMatrix(RotateDirection direction) {
 		}
 	}
 
-	FindBoundsFor(m_current, m_currentStartX, m_currentStartY, m_currentEndX, m_currentEndX);
+	FindBoundsFor(m_current, m_currentStartX, m_currentStartY, m_currentEndX, m_currentEndY);
 }
