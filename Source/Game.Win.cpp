@@ -27,10 +27,13 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifdef WIN32
 
 #include "stdafx.h"
+
+#ifdef WIN32
+
 #include "Game.h"
+#include"Board.h"
 #include <cassert>
 #include <algorithm>
 
@@ -38,6 +41,9 @@ using namespace std;
 using Microsoft::WRL::ComPtr;
 
 struct Game::Impl {
+	Impl();
+	~Impl();
+
 	void CreateAppWindow();
 	void InitGraphicsSystems();		
 
@@ -53,7 +59,7 @@ struct Game::Impl {
 	void CreateDeviceResources();
 	void CleanDeviceResources();
 
-	Microsoft::WRL::ComPtr<ID2D1Bitmap> LoadImage(const wchar_t* fileName) const;
+	ComPtr<ID2D1Bitmap> LoadImage(const wchar_t* fileName) const;
 
 	const wchar_t* APP_TITLE;
 	const wchar_t* APP_CLASS;
@@ -69,12 +75,12 @@ struct Game::Impl {
 	LARGE_INTEGER m_perfFrequency;
 	Board m_board;
 	D2D1_POINT_2F m_boardPos;
-	Microsoft::WRL::ComPtr<ID2D1Factory> m_drawFactory;
-	Microsoft::WRL::ComPtr<IDWriteFactory> m_writeFactory;
-	Microsoft::WRL::ComPtr<IWICImagingFactory> m_imageFactory;
-	Microsoft::WRL::ComPtr<ID2D1HwndRenderTarget> m_renderTarget;
-	Microsoft::WRL::ComPtr<ID2D1Brush> m_testBrush;
-	Microsoft::WRL::ComPtr<ID2D1Bitmap> m_terimonoBitmaps[Count_Tetrimonos];
+	ComPtr<ID2D1Factory> m_drawFactory;
+	ComPtr<IDWriteFactory> m_writeFactory;
+	ComPtr<IWICImagingFactory> m_imageFactory;
+	ComPtr<ID2D1HwndRenderTarget> m_renderTarget;
+	ComPtr<ID2D1Brush> m_testBrush;
+	ComPtr<ID2D1Bitmap> m_terimonoBitmaps[Count_Tetrimonos];
 };
 
 Game::Impl::Impl() 
@@ -89,15 +95,17 @@ Game::Impl::Impl()
 		, m_instance(nullptr) {
 }
 
+Game::Impl::~Impl() {
+	if (m_isClassRegistered && m_instance) {
+		::UnregisterClass(APP_CLASS, m_instance);
+	}
+}
 
 Game::Game()
 		: m_impl(new Impl()) {
 }
 
-Game::~Game() {
-	if (m_impl->m_isClassRegistered && m_impl->m_instance) {
-		::UnregisterClass(Game::Imple::APP_CLASS, m_impl->m_instance);
-	}
+Game::~Game() {	
 }
 
 void Game::Initialize() {
@@ -136,8 +144,8 @@ void Game::Impl::CreateAppWindow() {
 	wc.hIcon = ::LoadIcon(nullptr, IDI_APPLICATION);
 	wc.hIconSm = ::LoadIcon(nullptr, IDI_APPLICATION);
 	wc.hInstance = m_instance;
-	wc.lpfnWndProc = &Game::GameProc;
-	wc.lpszClassName = Game::APP_CLASS;
+	wc.lpfnWndProc = &GameProc;
+	wc.lpszClassName = APP_CLASS;
 	wc.lpszMenuName = nullptr;
 	wc.style = 0;
 
@@ -146,7 +154,7 @@ void Game::Impl::CreateAppWindow() {
 	
 	DWORD windowStyle = WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU;
 	DWORD exStyle = 0;
-	RECT windowSize = { 0, 0, Game::WINDOW_WIDTH, Game::WINDOW_HEIGHT };
+	RECT windowSize = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
 	assert(::AdjustWindowRectEx(&windowSize, windowStyle, FALSE, exStyle));
 
 	int width = windowSize.right - windowSize.left;
@@ -154,7 +162,7 @@ void Game::Impl::CreateAppWindow() {
 	int x = (::GetSystemMetrics(SM_CXSCREEN) - width) / 2;
 	int y = (::GetSystemMetrics(SM_CYSCREEN) - height) / 2;
 
-	m_window = ::CreateWindowExW(exStyle, Game::APP_CLASS, Game::APP_TITLE,
+	m_window = ::CreateWindowExW(exStyle, APP_CLASS, APP_TITLE,
 		windowStyle, x, y, width, height, HWND_DESKTOP, nullptr, m_instance,
 		reinterpret_cast<void*>(this));
 	assert(m_window != nullptr);
@@ -294,6 +302,78 @@ ComPtr<ID2D1Bitmap> Game::Impl::LoadImage(const wchar_t* fileName) const {
 void Game::Impl::CleanDeviceResources() {
 	m_testBrush = nullptr;
 	m_renderTarget = nullptr;
+}
+
+LRESULT Game::Impl::GameProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
+	if (message == WM_CREATE) {
+		CREATESTRUCT* createData = reinterpret_cast<CREATESTRUCT*>(lparam);
+		Game* game = reinterpret_cast<Game*>(createData->lpCreateParams);
+
+		::SetWindowLongPtr(window, GWLP_USERDATA,
+#ifdef _WIN64
+			reinterpret_cast<LONG_PTR>(game)
+#else
+			reinterpret_cast<LONG>(game)
+#endif
+			);
+		return 0;
+	} else {
+		Game* game = reinterpret_cast<Game*>(::GetWindowLongPtr(window, GWLP_USERDATA));
+		std::unique_ptr<Game::Impl>& impl = game->m_impl;
+
+		switch (message) {
+		case WM_PAINT:
+			return impl->OnPaint();
+		case WM_CLOSE:
+			return impl->OnClose();
+		case WM_DESTROY:
+			return impl->OnDestroy();
+		case WM_KEYDOWN:
+			return impl->OnKeyDown(static_cast<int>(wparam));
+		case WM_KEYUP:
+			return impl->OnKeyUp(static_cast<int>(wparam));
+		default:
+			return ::DefWindowProc(window, message, wparam, lparam);
+		}
+	}
+}
+
+LRESULT Game::Impl::OnKeyDown(int vk) {
+	switch (vk) {
+	case VK_LEFT:
+		m_board.MoveCurrent(-1, 0); break;
+	case VK_RIGHT:
+		m_board.MoveCurrent(1, 0); break;
+	case VK_UP:
+		m_board.RotateAntiClockwize(); break;
+	case VK_DOWN:
+		m_board.RotateClockwize(); break;
+	case VK_SPACE:
+		m_board.FallDown(); break;
+	case VK_ESCAPE:
+		::PostQuitMessage(0); break;
+	}
+	return 0;
+}
+
+LRESULT Game::Impl::OnKeyUp(int vk) {
+	UNREFERENCED_PARAMETER(vk);
+	return 0;
+}
+
+LRESULT Game::Impl::OnDestroy() {
+	::PostQuitMessage(0);
+	return 0;
+}
+
+LRESULT Game::Impl::OnClose() {
+	::DestroyWindow(m_window);
+	return 0;
+}
+
+LRESULT Game::Impl::OnPaint() {
+	::ValidateRect(m_window, &m_clientRect);
+	return 0;
 }
 
 #endif

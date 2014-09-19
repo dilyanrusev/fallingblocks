@@ -11,11 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Game.Win.cpp" />
     <ClCompile Include="Source\Log.cpp" />
     <ClCompile Include="Source\Board.cpp" />
     <ClCompile Include="Source\Com.cpp" />
-    <ClCompile Include="Source\Game.cpp" />
-    <ClCompile Include="Source\Game.WndProc.cpp" />
     <ClCompile Include="Source\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
