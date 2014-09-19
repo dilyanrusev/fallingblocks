@@ -31,24 +31,46 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "stdafx.h"
 #include <exception>
 #include "Game.h"
+
+
 #include "Com.h"
+
+#ifdef WIN32
 
 #pragma comment(lib, "D2d1.lib")
 #pragma comment(lib, "Dwrite.lib")
 
 int APIENTRY wWinMain(HINSTANCE hInst, HINSTANCE hPrevInst, wchar_t* cmdLine, int cmdShow) {	
+	UNREFERENCED_PARAMETER(hInst);
 	UNREFERENCED_PARAMETER(hPrevInst);
 	UNREFERENCED_PARAMETER(cmdLine);
 	UNREFERENCED_PARAMETER(cmdShow);
 
+#else
+
+#include "SDL.h"
+
+int main(int argc, char** argv) {
+
+#endif
+
 	try {
 		Com com;
 		Game game;
-		game.Initialize(hInst);
+		game.Initialize();
 		game.RunMainLoop();
 		return 0;
 	} catch (const std::exception& error) {
+#ifdef WIN32
 		::MessageBoxA(nullptr, error.what(), "Falling Blocks Error", MB_OK);
+#else
+		if (!::SDL_ShowSimpleMessageBox(
+				SDL_MESSAGEBOX_ERROR,
+				"Falling Blocks Error",
+				error.what(), nullptr)) {
+			fprintf(stderr, "%s\n", error.what());
+		}
+#endif
 		return 1;
 	}
 }

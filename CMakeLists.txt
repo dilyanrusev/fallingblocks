@@ -1,0 +1,31 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+ 
+PROJECT(fallingblocks)
+ 
+ADD_DEFINITIONS(
+    -std=c++11 
+    -Wall
+)
+
+ADD_EXECUTABLE(fallingblocks 
+	Source/Com.cpp 
+	Source/Log.cpp 
+	Source/Main.cpp
+	Source/Board.cpp
+	Source/Game.Linux.cpp
+)
+ 
+INCLUDE(FindPkgConfig)
+
+PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
+PKG_SEARCH_MODULE(SDL2IMAGE REQUIRED SDL2_image>=2.0.0)
+
+INCLUDE_DIRECTORIES(
+	${SDL2_INCLUDE_DIRS} 
+	${SDL2IMAGE_INCLUDE_DIRS}
+)
+
+TARGET_LINK_LIBRARIES(fallingblocks 
+	${SDL2_LIBRARIES} 
+	${SDL2IMAGE_LIBRARIES}
+)

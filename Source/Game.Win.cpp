@@ -27,6 +27,7 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#ifdef WIN32
 
 #include "stdafx.h"
 #include "Game.h"
@@ -36,7 +37,47 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using Microsoft::WRL::ComPtr;
 
-Game::Game()
+struct Game::Impl {
+	void CreateAppWindow();
+	void InitGraphicsSystems();		
+
+	static LRESULT CALLBACK GameProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam);
+	LRESULT OnDestroy();
+	LRESULT OnClose();
+	LRESULT OnPaint();
+	LRESULT OnKeyDown(int vk);
+	LRESULT OnKeyUp(int vk);
+
+	void Update(float ms);
+	void Render();
+	void CreateDeviceResources();
+	void CleanDeviceResources();
+
+	Microsoft::WRL::ComPtr<ID2D1Bitmap> LoadImage(const wchar_t* fileName) const;
+
+	const wchar_t* APP_TITLE;
+	const wchar_t* APP_CLASS;
+	const int WINDOW_WIDTH;
+	const int WINDOW_HEIGHT;
+	const int BLOCK_WIDTH;
+	const int BLOCK_HEIGHT;		
+	
+	RECT m_clientRect;
+	bool m_isClassRegistered;
+	HWND m_window;
+	HINSTANCE m_instance;
+	LARGE_INTEGER m_perfFrequency;
+	Board m_board;
+	D2D1_POINT_2F m_boardPos;
+	Microsoft::WRL::ComPtr<ID2D1Factory> m_drawFactory;
+	Microsoft::WRL::ComPtr<IDWriteFactory> m_writeFactory;
+	Microsoft::WRL::ComPtr<IWICImagingFactory> m_imageFactory;
+	Microsoft::WRL::ComPtr<ID2D1HwndRenderTarget> m_renderTarget;
+	Microsoft::WRL::ComPtr<ID2D1Brush> m_testBrush;
+	Microsoft::WRL::ComPtr<ID2D1Bitmap> m_terimonoBitmaps[Count_Tetrimonos];
+};
+
+Game::Impl::Impl() 
 		: APP_TITLE(L"Falling Blocks")
 		, APP_CLASS(L"FallingBlocks")
 		, WINDOW_WIDTH(1280)
@@ -48,24 +89,28 @@ Game::Game()
 		, m_instance(nullptr) {
 }
 
+
+Game::Game()
+		: m_impl(new Impl()) {
+}
+
 Game::~Game() {
-	if (m_isClassRegistered && m_instance) {
-		::UnregisterClass(Game::APP_CLASS, m_instance);
+	if (m_impl->m_isClassRegistered && m_impl->m_instance) {
+		::UnregisterClass(Game::Imple::APP_CLASS, m_impl->m_instance);
 	}
 }
 
-void Game::Initialize(HINSTANCE instance) {
-	assert(instance != nullptr);
-	m_instance = instance;
+void Game::Initialize() {
+	m_impl->m_instance = static_cast<HINSTANCE>(::GetModuleHandle(nullptr));
 
-	assert(::QueryPerformanceFrequency(&m_perfFrequency));
+	assert(::QueryPerformanceFrequency(&m_impl->m_perfFrequency));
 
-	CreateAppWindow();
-	InitGraphicsSystems();	
-	CreateDeviceResources();
+	m_impl->CreateAppWindow();
+	m_impl->InitGraphicsSystems();	
+	m_impl->CreateDeviceResources();
 }
 
-void Game::InitGraphicsSystems() {
+void Game::Impl::InitGraphicsSystems() {
 	HRESULT hr = ::CoCreateInstance(CLSID_WICImagingFactory1, nullptr,
 		CLSCTX_INPROC_SERVER, __uuidof(m_imageFactory), 
 		reinterpret_cast<void**>(m_imageFactory.GetAddressOf()));
@@ -79,7 +124,7 @@ void Game::InitGraphicsSystems() {
 	assert(SUCCEEDED(hr));
 }
 
-void Game::CreateAppWindow() {
+void Game::Impl::CreateAppWindow() {
 	assert(m_instance != nullptr);	
 
 	WNDCLASSEX wc;
@@ -124,11 +169,11 @@ void Game::CreateAppWindow() {
 }
 
 void Game::RunMainLoop() {
-	assert(m_instance);
-	assert(m_window);
+	assert(m_impl->m_instance);
+	assert(m_impl->m_window);
 
-	::ShowWindow(m_window, SW_SHOW);
-	::UpdateWindow(m_window);
+	::ShowWindow(m_impl->m_window, SW_SHOW);
+	::UpdateWindow(m_impl->m_window);
 
 	MSG msg;
 	msg.message = WM_NULL;
@@ -144,19 +189,19 @@ void Game::RunMainLoop() {
 		}
 
 		::QueryPerformanceCounter(&now);
-		elapsedInMs = static_cast<float>((now.QuadPart - before.QuadPart) * 1000 / m_perfFrequency.QuadPart);
+		elapsedInMs = static_cast<float>((now.QuadPart - before.QuadPart) * 1000 / m_impl->m_perfFrequency.QuadPart);
 
-		Update(elapsedInMs);
-		Render();
+		m_impl->Update(elapsedInMs);
+		m_impl->Render();
 		before = now;
 	}
 }
 
-void Game::Update(float ms) {
+void Game::Impl::Update(float ms) {
 	m_board.Update(ms);
 }
 
-void Game::Render() {	
+void Game::Impl::Render() {	
 	m_renderTarget->BeginDraw();
 	m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::AliceBlue));
 
@@ -194,7 +239,7 @@ void Game::Render() {
 	}		
 }
 
-void Game::CreateDeviceResources() {
+void Game::Impl::CreateDeviceResources() {
 	HRESULT hr;
 	hr = m_drawFactory->CreateHwndRenderTarget(
 		D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat(), 96.0f, 96.0f),
@@ -218,7 +263,7 @@ void Game::CreateDeviceResources() {
 	m_terimonoBitmaps[Tetrimono_Z] = LoadImage(L"Assets/block_yellow.png");
 }
 
-ComPtr<ID2D1Bitmap> Game::LoadImage(const wchar_t* fileName) const {
+ComPtr<ID2D1Bitmap> Game::Impl::LoadImage(const wchar_t* fileName) const {
 	ComPtr<IWICBitmapDecoder> decoder;
 	assert(SUCCEEDED(
 		m_imageFactory->CreateDecoderFromFilename(fileName, nullptr, GENERIC_READ, 
@@ -246,7 +291,9 @@ ComPtr<ID2D1Bitmap> Game::LoadImage(const wchar_t* fileName) const {
 }
 
 
-void Game::CleanDeviceResources() {
+void Game::Impl::CleanDeviceResources() {
 	m_testBrush = nullptr;
 	m_renderTarget = nullptr;
 }
+
+#endif

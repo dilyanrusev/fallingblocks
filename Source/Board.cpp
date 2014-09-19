@@ -42,13 +42,18 @@ Board::Board()
 		, MAX_TETRIMONO_WIDTH(4)
 		, MAX_TETRIMONO_HEIGHT(4)
 		, m_currentX(0)
-		, m_currentY(0)		
+		, m_currentY(0)	
+		, m_currentStartX(0)
+		, m_currentEndX(0)
+		, m_currentStartY(0)
+		, m_currentEndY(0)
 		, m_currentType(Tetrimono_Empty)
-		, m_randomDistributor(Tetrimono_I, Tetrimono_Z)
-		, m_timeBetweenFall(500)
+		, m_nextType(Tetrimono_Empty)
 		, m_elapsedSinceLastFall(0)
+		, m_timeBetweenFall(500)
+		, m_isGameOver(false)
 		, m_isFirstFallAfterSpawn(true)
-		, m_isGameOver(false) {	
+		, m_randomDistributor(Tetrimono_I, Tetrimono_Z) {	
 	Empty(m_matrix);
 	m_nextType = static_cast<Tetrimonos>(m_randomDistributor(m_randomGenerator));
 	GetMatrixFor(m_nextType, m_next);
@@ -64,7 +69,7 @@ void Board::Update(float ms) {
 	}
 
 	m_elapsedSinceLastFall += ms;
-	Log("elaped = %f; ms = %f\n", m_elapsedSinceLastFall, ms);
+	//Log("elaped = %f; ms = %f\n", m_elapsedSinceLastFall, ms);
 	if (m_elapsedSinceLastFall >= m_timeBetweenFall) {
 		m_elapsedSinceLastFall = 0;		
 		MergeResult fallResult = MoveCurrent(0, 1);

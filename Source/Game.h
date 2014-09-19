@@ -30,57 +30,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "stdafx.h"
-#include "Board.h"
+#include <memory>
 
 class Game {
 public:
 	Game();
 	~Game();
 
-	void Initialize(HINSTANCE instance);
+	void Initialize();
 	void RunMainLoop();
 
 private:	
 	Game(const Game&);
 	Game& operator=(const Game&);
 
-	void CreateAppWindow();
-	void InitGraphicsSystems();		
-
-	static LRESULT CALLBACK GameProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam);
-	LRESULT OnDestroy();
-	LRESULT OnClose();
-	LRESULT OnPaint();
-	LRESULT OnKeyDown(int vk);
-	LRESULT OnKeyUp(int vk);
-
-	void Update(float ms);
-	void Render();
-	void CreateDeviceResources();
-	void CleanDeviceResources();
-
-	Microsoft::WRL::ComPtr<ID2D1Bitmap> LoadImage(const wchar_t* fileName) const;
-
-	const wchar_t* APP_TITLE;
-	const wchar_t* APP_CLASS;
-	const int WINDOW_WIDTH;
-	const int WINDOW_HEIGHT;
-	const int BLOCK_WIDTH;
-	const int BLOCK_HEIGHT;		
-	
-	RECT m_clientRect;
-	bool m_isClassRegistered;
-	HWND m_window;
-	HINSTANCE m_instance;
-	LARGE_INTEGER m_perfFrequency;
-	Board m_board;
-	D2D1_POINT_2F m_boardPos;
-	Microsoft::WRL::ComPtr<ID2D1Factory> m_drawFactory;
-	Microsoft::WRL::ComPtr<IDWriteFactory> m_writeFactory;
-	Microsoft::WRL::ComPtr<IWICImagingFactory> m_imageFactory;
-	Microsoft::WRL::ComPtr<ID2D1HwndRenderTarget> m_renderTarget;
-	Microsoft::WRL::ComPtr<ID2D1Brush> m_testBrush;
-	Microsoft::WRL::ComPtr<ID2D1Bitmap> m_terimonoBitmaps[Count_Tetrimonos];
+	struct Impl;
+	std::unique_ptr<Impl> m_impl;	
 };
-

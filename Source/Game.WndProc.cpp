@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "stdafx.h"
 #include "Game.h"
 
-LRESULT Game::GameProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
+LRESULT Game::Impl::GameProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
 	if (message == WM_CREATE) {
 		CREATESTRUCT* createData = reinterpret_cast<CREATESTRUCT*>(lparam);
 		Game* game = reinterpret_cast<Game*>(createData->lpCreateParams);
@@ -49,22 +49,22 @@ LRESULT Game::GameProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) 
 
 		switch (message) {
 		case WM_PAINT:
-			return game->OnPaint();
+			return game->impl->OnPaint();
 		case WM_CLOSE:
-			return game->OnClose();
+			return game->impl->OnClose();
 		case WM_DESTROY:
-			return game->OnDestroy();
+			return game->impl->OnDestroy();
 		case WM_KEYDOWN:
-			return game->OnKeyDown(static_cast<int>(wparam));
+			return game->impl->OnKeyDown(static_cast<int>(wparam));
 		case WM_KEYUP:
-			return game->OnKeyUp(static_cast<int>(wparam));
+			return game->impl->OnKeyUp(static_cast<int>(wparam));
 		default:
 			return ::DefWindowProc(window, message, wparam, lparam);
 		}
 	}
 }
 
-LRESULT Game::OnKeyDown(int vk) {
+LRESULT Game::Impl::OnKeyDown(int vk) {
 	switch (vk) {
 	case VK_LEFT: 
 		m_board.MoveCurrent(-1, 0); break;
@@ -82,22 +82,22 @@ LRESULT Game::OnKeyDown(int vk) {
 	return 0;
 }
 
-LRESULT Game::OnKeyUp(int vk) {
+LRESULT Game::Impl::OnKeyUp(int vk) {
 	UNREFERENCED_PARAMETER(vk);
 	return 0;
 }
 
-LRESULT Game::OnDestroy() {
+LRESULT Game::Impl::OnDestroy() {
 	::PostQuitMessage(0);
 	return 0;
 }
 
-LRESULT Game::OnClose() {
+LRESULT Game::Impl::OnClose() {
 	::DestroyWindow(m_window);
 	return 0;
 }
 
-LRESULT Game::OnPaint() {	
+LRESULT Game::Impl::OnPaint() {	
 	::ValidateRect(m_window, &m_clientRect);
 	return 0;
 }
