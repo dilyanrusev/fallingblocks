@@ -50,6 +50,11 @@ enum MergeResult {
 	MergeResult_OK
 };
 
+enum RotateDirection {
+	RotateDirection_Clockwize,
+	RotateDirection_AntiClockwize
+};
+
 class Board {
 public:
 	Board();
@@ -57,8 +62,7 @@ public:
 
 	void Update(float ms);	
 	MergeResult MoveCurrent(int deltaX, int deltaY);
-	void RotateClockwize();
-	void RotateAntiClockwize();
+	MergeResult Rotate(RotateDirection direction);	
 	void FallDown();
 	
 	inline Tetrimonos GetAt(int x, int y) const {
@@ -91,7 +95,7 @@ private:
 	void Empty(ArrayTetrimonos10x20& matrix) const;
 	void RemoveCurrentFromMatrix(ArrayTetrimonos10x20& matrix) const;
 	MergeResult MergeCurrent(ArrayTetrimonos10x20& result) const;
-	void RotateCurrentMatrixClockwize(ArrayTetrimonos4x4& rotated, int& startX, int& startY, int& endX, int& endY) const;
+	void RotateCurrentMatrix(RotateDirection direction);
 	void FindBoundsFor(const ArrayTetrimonos4x4& figure, int& startX, int& startY, int& endX, int& endY) const;
 	
 	int m_currentX;

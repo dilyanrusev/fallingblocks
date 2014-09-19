@@ -94,14 +94,6 @@ void Board::Update(float ms) {
 	}
 }
 
-void Board::RotateAntiClockwize() {
-
-}
-
-void Board::RotateClockwize() {
-
-}
-
 void Board::FallDown() {
 	if (m_isGameOver) {
 		return;
@@ -285,14 +277,43 @@ MergeResult Board::MoveCurrent(int deltaX, int deltaY) {
 	return res;
 }
 
+MergeResult Board::Rotate(RotateDirection direction) {
+	ArrayTetrimonos10x20 mergedMatrix;
+	std::copy(begin(m_matrix), end(m_matrix), begin(mergedMatrix));
+	RemoveCurrentFromMatrix(mergedMatrix);
+
+	int startX, endX, startY, endY;
+	startX = m_currentStartX;
+	endX = m_currentEndX;
+	startY = m_currentStartY;
+	endY = m_currentEndY;
+	ArrayTetrimonos4x4 original;
+	std::copy(begin(m_current), end(m_current), begin(original));
+
+	RotateCurrentMatrix(direction);
+
+	MergeResult res = MergeCurrent(mergedMatrix);
+	if (res == MergeResult_OK) {
+		std::copy(begin(mergedMatrix), end(mergedMatrix), begin(m_matrix));
+	} else {
+		m_currentStartX = startX;
+		m_currentEndX = endX;
+		m_currentStartY = startY;
+		m_currentEndY = endY;
+		std::copy(begin(original), end(original), begin(m_current));
+	}
+
+	return res;
+}
+
 void Board::FindBoundsFor(const ArrayTetrimonos4x4& figure, int& startX, int& startY, int& endX, int& endY) const {
-	startX = WIDTH - 1;
+	startX = MAX_TETRIMONO_WIDTH - 1;
 	endX = 0;
-	startY = HEIGHT - 1;
+	startY = MAX_TETRIMONO_HEIGHT - 1;
 	endY = 0;
 	
-	for (int y = 0; y < HEIGHT; y++) {
-		for (int x = 0; x < WIDTH; x++) {
+	for (int y = 0; y < MAX_TETRIMONO_HEIGHT; y++) {
+		for (int x = 0; x < MAX_TETRIMONO_WIDTH; x++) {
 			if (figure[y][x] != Tetrimono_Empty) {
 				startX = std::min(startX, x);
 				endX = std::max(endX, x);
@@ -303,12 +324,23 @@ void Board::FindBoundsFor(const ArrayTetrimonos4x4& figure, int& startX, int& st
 	}
 }
 
-void Board::RotateCurrentMatrixClockwize(ArrayTetrimonos4x4& rotated, int& startX, int& startY, int& endX, int& endY) const {
-	for (int y = 0; y < HEIGHT; y++) {
-		for (int x = 0; x < WIDTH; x++) {
-			rotated[y][x] = m_current[x][HEIGHT - y - 1];
+void Board::RotateCurrentMatrix(RotateDirection direction) {
+	ArrayTetrimonos4x4 source;
+	std::copy(begin(m_current), end(m_current), begin(source));
+
+	if (direction == RotateDirection_Clockwize) {
+		for (int y = 0; y < MAX_TETRIMONO_HEIGHT; y++) {
+			for (int x = 0; x < MAX_TETRIMONO_WIDTH; x++) {
+				m_current[y][x] = source[x][MAX_TETRIMONO_HEIGHT - y - 1];
+			}
+		}
+	} else {
+		for (int y = 0; y < MAX_TETRIMONO_HEIGHT; y++) {
+			for (int x = 0; x < MAX_TETRIMONO_WIDTH; x++) {
+				m_current[y][x] = source[MAX_TETRIMONO_WIDTH - x - 1][y];
+			}
 		}
 	}
 
-	FindBoundsFor(rotated, startX, startY, endX, endY);
+	FindBoundsFor(m_current, m_currentStartX, m_currentStartY, m_currentEndX, m_currentEndX);
 }
