@@ -47,6 +47,9 @@ struct Game::Impl {
 	void CreateAppWindow();
 	void InitGraphicsSystems();		
 
+	void RunMainLoop();
+	void Initialize();
+
 	static LRESULT CALLBACK GameProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam);
 	LRESULT OnDestroy();
 	LRESULT OnClose();
@@ -109,13 +112,17 @@ Game::~Game() {
 }
 
 void Game::Initialize() {
-	m_impl->m_instance = static_cast<HINSTANCE>(::GetModuleHandle(nullptr));
+	m_impl->Initialize();
+}
 
-	assert(::QueryPerformanceFrequency(&m_impl->m_perfFrequency));
+void Game::Impl::Initialize() {
+	m_instance = static_cast<HINSTANCE>(::GetModuleHandle(nullptr));
 
-	m_impl->CreateAppWindow();
-	m_impl->InitGraphicsSystems();	
-	m_impl->CreateDeviceResources();
+	assert(::QueryPerformanceFrequency(&m_perfFrequency));
+
+	CreateAppWindow();
+	InitGraphicsSystems();
+	CreateDeviceResources();
 }
 
 void Game::Impl::InitGraphicsSystems() {
@@ -177,11 +184,15 @@ void Game::Impl::CreateAppWindow() {
 }
 
 void Game::RunMainLoop() {
-	assert(m_impl->m_instance);
-	assert(m_impl->m_window);
+	m_impl->RunMainLoop();
+}
 
-	::ShowWindow(m_impl->m_window, SW_SHOW);
-	::UpdateWindow(m_impl->m_window);
+void Game::Impl::RunMainLoop() {
+	assert(m_instance);
+	assert(m_window);
+
+	::ShowWindow(m_window, SW_SHOW);
+	::UpdateWindow(m_window);
 
 	MSG msg;
 	msg.message = WM_NULL;
@@ -197,10 +208,10 @@ void Game::RunMainLoop() {
 		}
 
 		::QueryPerformanceCounter(&now);
-		elapsedInMs = static_cast<float>((now.QuadPart - before.QuadPart) * 1000 / m_impl->m_perfFrequency.QuadPart);
+		elapsedInMs = static_cast<float>((now.QuadPart - before.QuadPart) * 1000 / m_perfFrequency.QuadPart);
 
-		m_impl->Update(elapsedInMs);
-		m_impl->Render();
+		Update(elapsedInMs);
+		Render();
 		before = now;
 	}
 }
