@@ -298,7 +298,17 @@ void Board::FindBoundsFor(const ArrayTetrimonos4x4& figure, int& startX, int& st
 				endX = std::max(endX, x);
 				startY = std::min(startY, y);
 				endY = std::max(endY, y);
-			}			
+			}
 		}
 	}
+}
+
+void Board::RotateCurrentMatrixClockwize(ArrayTetrimonos4x4& rotated, int& startX, int& startY, int& endX, int& endY) const {
+	for (int y = 0; y < HEIGHT; y++) {
+		for (int x = 0; x < WIDTH; x++) {
+			rotated[y][x] = m_current[x][HEIGHT - y - 1];
+		}
+	}
+
+	FindBoundsFor(rotated, startX, startY, endX, endY);
 }
