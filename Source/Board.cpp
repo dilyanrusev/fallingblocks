@@ -31,10 +31,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "stdafx.h"
 #include "Board.h"
 #include <cassert>
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 #include <algorithm>
 #include "Log.h"
 
-using namespace std;
+using std::begin;
+using std::end;
 
 Board::Board()
 		: WIDTH(10)
@@ -276,4 +283,22 @@ MergeResult Board::MoveCurrent(int deltaX, int deltaY) {
 	}
 
 	return res;
+}
+
+void Board::FindBoundsFor(const ArrayTetrimonos4x4& figure, int& startX, int& startY, int& endX, int& endY) const {
+	startX = WIDTH - 1;
+	endX = 0;
+	startY = HEIGHT - 1;
+	endY = 0;
+	
+	for (int y = 0; y < HEIGHT; y++) {
+		for (int x = 0; x < WIDTH; x++) {
+			if (figure[y][x] != Tetrimono_Empty) {
+				startX = std::min(startX, x);
+				endX = std::max(endX, x);
+				startY = std::min(startY, y);
+				endY = std::max(endY, y);
+			}			
+		}
+	}
 }
