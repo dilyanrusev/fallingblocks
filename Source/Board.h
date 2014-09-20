@@ -74,6 +74,12 @@ public:
 	inline bool IsGameOver() const {
 		return m_isGameOver;
 	}
+	inline int GetScore() const {
+		return m_score;
+	}
+	inline int GetLevel() const {
+		return m_level;
+	}
 
 	const int WIDTH;
 	const int HEIGHT;
@@ -98,7 +104,11 @@ private:
 	void RotateCurrentMatrix(RotateDirection direction);
 	void FindBoundsFor(const ArrayTetrimonos4x4& figure, int& startX, int& startY, int& endX, int& endY) const;
 	void FindBorders(const ArrayTetrimonos4x4& matrix, int& startX, int& endX, int& startY, int& endY) const;
+	int RemoveCompletedLines();
+	void AdaptForRemovedLines(int countRemovedLines);
 	
+	int m_score;
+	int m_level;
 	int m_currentX;
 	int m_currentY;
 	int m_currentStartX;

@@ -48,6 +48,8 @@ Board::Board()
 		, HEIGHT(20)
 		, MAX_TETRIMONO_WIDTH(4)
 		, MAX_TETRIMONO_HEIGHT(4)
+		, m_score(0)
+		, m_level(1)
 		, m_currentX(0)
 		, m_currentY(0)	
 		, m_currentStartX(0)
@@ -92,8 +94,15 @@ void Board::Update(float ms) {
 		}
 	} else {
 		m_isFirstFallAfterSpawn = false;
-	}
-	
+	}	
+}
+
+int Board::RemoveCompletedLines() {
+	return 0;
+}
+
+void Board::AdaptForRemovedLines(int countRemovedLines) {
+
 }
 
 void Board::FallDown() {
