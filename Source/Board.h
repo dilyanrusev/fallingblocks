@@ -90,6 +90,16 @@ private:
 	typedef std::array < std::array<Tetrimonos, 4>, 4 > ArrayTetrimonos4x4;
 	typedef std::array < std::array<Tetrimonos, 10>, 20 > ArrayTetrimonos10x20;
 
+	struct RemovedLinesStats {
+		int countRemovedLines;
+		int countConsequtiveLines;
+
+		RemovedLinesStats() 
+			: countRemovedLines(0)
+			, countConsequtiveLines(0) {			
+		}
+	};
+
 	Board(const Board&);
 	Board& operator=(const Board&);
 
@@ -104,8 +114,9 @@ private:
 	void RotateCurrentMatrix(RotateDirection direction);
 	void FindBoundsFor(const ArrayTetrimonos4x4& figure, int& startX, int& startY, int& endX, int& endY) const;
 	void FindBorders(const ArrayTetrimonos4x4& matrix, int& startX, int& endX, int& startY, int& endY) const;
-	int RemoveCompletedLines();
-	void AdaptForRemovedLines(int countRemovedLines);
+	RemovedLinesStats RemoveCompletedLines();
+	void AdaptForRemovedLines(RemovedLinesStats removeStats);
+	void HandleFallen();
 	
 	int m_score;
 	int m_level;

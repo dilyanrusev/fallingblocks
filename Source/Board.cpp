@@ -85,23 +85,64 @@ void Board::Update(float ms) {
 	m_elapsedSinceLastFall = 0;		
 	MergeResult fallResult = MoveCurrent(0, 1);
 	if (fallResult == MergeResult_Conflict) {
-		if (!m_isFirstFallAfterSpawn) {
-			SpawnNext();
-			m_isFirstFallAfterSpawn = true;
-		}
-		else {
-			m_isGameOver = true;
-		}
+		HandleFallen();
 	} else {
 		m_isFirstFallAfterSpawn = false;
 	}	
 }
 
-int Board::RemoveCompletedLines() {
-	return 0;
+void Board::HandleFallen() {
+	RemovedLinesStats removedStats = RemoveCompletedLines();
+	AdaptForRemovedLines(removedStats);
+
+	if (!m_isFirstFallAfterSpawn) {
+		SpawnNext();
+		m_isFirstFallAfterSpawn = true;
+	}
+	else {
+		m_isGameOver = true;
+	}
 }
 
-void Board::AdaptForRemovedLines(int countRemovedLines) {
+Board::RemovedLinesStats Board::RemoveCompletedLines() {
+	RemovedLinesStats stats;
+	int lastRemovedIndex = -1;
+	int countProcessedLines = 0;
+	while (countProcessedLines < HEIGHT) {
+		for (int y = HEIGHT - 1; y > 0; y--) {
+			int countNonEmpty = 0;
+			for (int x = 0; x < WIDTH; x++) {
+				if (m_matrix[y][x] != Tetrimono_Empty) {
+					countNonEmpty++;
+				}
+			}
+
+			//Log("countNonEmpty at %d == %d\n", y, countNonEmpty);
+			if (countNonEmpty < WIDTH) {
+				countProcessedLines++;
+				continue;
+			}
+
+			countProcessedLines = 0;
+			if (lastRemovedIndex == y - 1) {
+				stats.countConsequtiveLines++;
+			}
+			lastRemovedIndex = y;
+			stats.countRemovedLines++;
+			
+			for (int movedY = y - 1; movedY >= 0; movedY--) {
+				for (int x = 0; x < WIDTH; x++) {
+					m_matrix[movedY + 1][x] = m_matrix[movedY][x];
+				}
+			}
+			break;
+		}
+	}
+
+	return stats;
+}
+
+void Board::AdaptForRemovedLines(RemovedLinesStats removedStats) {
 
 }
 
@@ -114,8 +155,7 @@ void Board::FallDown() {
 	do {
 		fallResult = MoveCurrent(0, 1);
 	} while (fallResult != MergeResult_Conflict);
-	SpawnNext();
-	m_isFirstFallAfterSpawn = true;
+	HandleFallen();
 }
 
 void Board::Empty(ArrayTetrimonos4x4& matrix) const {
