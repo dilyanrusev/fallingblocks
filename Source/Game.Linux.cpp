@@ -219,8 +219,8 @@ void Game::Impl::Render() {
 	SDL_Rect dest;
 	dest.w = BLOCK_WIDTH;
 	dest.h = BLOCK_HEIGHT;
-	for (int y = 0; y < m_board.HEIGHT; y++) {
-		for (int x = 0; x < m_board.WIDTH; x++) {
+	for (int y = 0; y < Board::HEIGHT; y++) {
+		for (int x = 0; x < Board::WIDTH; x++) {
 			Tetrimonos type = m_board.GetAt(x, y);
 			SDL_Texture* texture = m_terimonos[type];
 			dest.x = m_boardPos.x + x * BLOCK_WIDTH;
@@ -231,8 +231,8 @@ void Game::Impl::Render() {
 		}
 	}	
 	
-	for (int y = 0; y < m_board.MAX_TETRIMONO_HEIGHT; y++) {
-		for (int x = 0; x < m_board.MAX_TETRIMONO_WIDTH; x++) {
+	for (int y = 0; y < Board::MAX_TETRIMONO_HEIGHT; y++) {
+		for (int x = 0; x < Board::MAX_TETRIMONO_WIDTH; x++) {
 			Tetrimonos type = m_board.GetNextAt(x, y);
 			SDL_Texture* texture = m_terimonos[type];
 

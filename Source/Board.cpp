@@ -29,26 +29,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "stdafx.h"
-#include "Board.h"
-#include <cassert>
 #ifdef min
 #undef min
 #endif
 #ifdef max
 #undef max
 #endif
-#include <algorithm>
+
+#include "Board.h"
 #include "Log.h"
+
+#include <cassert>
+#include <algorithm>
+#include <chrono>
 
 using std::begin;
 using std::end;
 
+const int Board::WIDTH = 10;
+const int Board::HEIGHT = 20;
+const int Board::MAX_TETRIMONO_WIDTH = 4;
+const int Board::MAX_TETRIMONO_HEIGHT = 4;
+const int Board::SCORE_BETWEEN_LEVELS = 1000;
+const int Board::SCORE_PER_LINE = 100;
+const int Board::SCORE_BONUS_PER_CONSEQUTIVE_LINE = 50;
+
 Board::Board()
-		: WIDTH(10)
-		, HEIGHT(20)
-		, MAX_TETRIMONO_WIDTH(4)
-		, MAX_TETRIMONO_HEIGHT(4)
-		, m_score(0)
+		: m_score(0)
+		, m_scoreUntilNextLevel(SCORE_BETWEEN_LEVELS)
 		, m_level(1)
 		, m_currentX(0)
 		, m_currentY(0)	
@@ -62,6 +70,7 @@ Board::Board()
 		, m_timeBetweenFall(1000)
 		, m_isGameOver(false)
 		, m_isFirstFallAfterSpawn(true)
+		, m_randomGenerator(std::chrono::system_clock::now().time_since_epoch().count())
 		, m_randomDistributor(Tetrimono_I, Tetrimono_Z) {	
 	Empty(m_matrix);
 	m_nextType = static_cast<Tetrimonos>(m_randomDistributor(m_randomGenerator));
@@ -143,7 +152,15 @@ Board::RemovedLinesStats Board::RemoveCompletedLines() {
 }
 
 void Board::AdaptForRemovedLines(RemovedLinesStats removedStats) {
+	int earned = removedStats.countRemovedLines * SCORE_PER_LINE
+		+ removedStats.countConsequtiveLines * SCORE_BONUS_PER_CONSEQUTIVE_LINE;
 
+	m_score += earned;
+	m_scoreUntilNextLevel -= earned;
+	if (m_scoreUntilNextLevel <= 0) {
+		m_level++;
+		m_scoreUntilNextLevel = SCORE_BETWEEN_LEVELS + m_scoreUntilNextLevel;
+	}
 }
 
 void Board::FallDown() {

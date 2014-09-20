@@ -81,12 +81,16 @@ public:
 		return m_level;
 	}
 
-	const int WIDTH;
-	const int HEIGHT;
-	const int MAX_TETRIMONO_WIDTH;
-	const int MAX_TETRIMONO_HEIGHT;
+	static const int WIDTH;
+	static const int HEIGHT;
+	static const int MAX_TETRIMONO_WIDTH;
+	static const int MAX_TETRIMONO_HEIGHT;	
 
 private:
+	static const int SCORE_BETWEEN_LEVELS;
+	static const int SCORE_PER_LINE;
+	static const int SCORE_BONUS_PER_CONSEQUTIVE_LINE;
+
 	typedef std::array < std::array<Tetrimonos, 4>, 4 > ArrayTetrimonos4x4;
 	typedef std::array < std::array<Tetrimonos, 10>, 20 > ArrayTetrimonos10x20;
 
@@ -119,6 +123,7 @@ private:
 	void HandleFallen();
 	
 	int m_score;
+	int m_scoreUntilNextLevel;
 	int m_level;
 	int m_currentX;
 	int m_currentY;
