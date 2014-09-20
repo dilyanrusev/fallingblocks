@@ -31,10 +31,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "stdafx.h"
 #include "Board.h"
 #include <cassert>
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 #include <algorithm>
 #include "Log.h"
 
-using namespace std;
+using std::begin;
+using std::end;
 
 Board::Board()
 		: WIDTH(10)
@@ -85,6 +92,19 @@ void Board::Update(float ms) {
 			m_isFirstFallAfterSpawn = false;
 		}
 	}
+}
+
+void Board::FallDown() {
+	if (m_isGameOver) {
+		return;
+	}
+
+	MergeResult fallResult;
+	do {
+		fallResult = MoveCurrent(0, 1);
+	} while (fallResult != MergeResult_Conflict);
+	SpawnNext();
+	m_isFirstFallAfterSpawn = true;
 }
 
 void Board::Empty(ArrayTetrimonos4x4& matrix) const {
@@ -257,50 +277,70 @@ MergeResult Board::MoveCurrent(int deltaX, int deltaY) {
 	return res;
 }
 
-void Board::RotateCurrentMatrixClockwize(ArrayTetrimonos4x4& result, int& startX, int& endX, int& startY, int& endY) const {
-	for (int y = 0; y < HEIGHT; y++) {
-		for (int x = 0; x < WIDTH; x++) {
-			result[y][x] = m_current[x][HEIGHT - y - 1];
-		}
-	}
-	
+MergeResult Board::Rotate(RotateDirection direction) {
+	ArrayTetrimonos10x20 mergedMatrix;
+	std::copy(begin(m_matrix), end(m_matrix), begin(mergedMatrix));
+	RemoveCurrentFromMatrix(mergedMatrix);
 
-	FindBorders(result, startX, endX, startY, endY);
+	int startX, endX, startY, endY;
+	startX = m_currentStartX;
+	endX = m_currentEndX;
+	startY = m_currentStartY;
+	endY = m_currentEndY;
+	ArrayTetrimonos4x4 original;
+	std::copy(begin(m_current), end(m_current), begin(original));
+
+	RotateCurrentMatrix(direction);
+
+	MergeResult res = MergeCurrent(mergedMatrix);
+	if (res == MergeResult_OK) {
+		std::copy(begin(mergedMatrix), end(mergedMatrix), begin(m_matrix));
+	} else {
+		m_currentStartX = startX;
+		m_currentEndX = endX;
+		m_currentStartY = startY;
+		m_currentEndY = endY;
+		std::copy(begin(original), end(original), begin(m_current));
+	}
+
+	return res;
 }
 
-void Board::RotateCurrentMatrixAntiClockwize(ArrayTetrimonos4x4& result, int& startX, int& endX, int& startY, int& endY) const {
-	for (int y = 0; y < HEIGHT; y++) {
-		for (int x = 0; x < WIDTH; x++) {
-			result[y][x] = m_current[WIDTH - x - 1][y];
-		}
-	}
-	
-
-	FindBorders(result, startX, endX, startY, endY);
-}
-
-void Board::FindBorders(const ArrayTetrimonos4x4& matrix, int& startX, int& endX, int& startY, int& endY) const {
-	startX = WIDTH - 1;
-	startY = HEIGHT - 1;
+void Board::FindBoundsFor(const ArrayTetrimonos4x4& figure, int& startX, int& startY, int& endX, int& endY) const {
+	startX = MAX_TETRIMONO_WIDTH - 1;
 	endX = 0;
+	startY = MAX_TETRIMONO_HEIGHT - 1;
 	endY = 0;
-
-	for (int y = 0; y < HEIGHT; y++) {
-		for (int x = 0; x < WIDTH; x++) {
-			if (matrix[y][x] != Tetrimono_Empty) {
+	
+	for (int y = 0; y < MAX_TETRIMONO_HEIGHT; y++) {
+		for (int x = 0; x < MAX_TETRIMONO_WIDTH; x++) {
+			if (figure[y][x] != Tetrimono_Empty) {
 				startX = std::min(startX, x);
-				startY = std::min(startY, y);
 				endX = std::max(endX, x);
+				startY = std::min(startY, y);
 				endY = std::max(endY, y);
 			}
 		}
 	}
 }
 
-MergeResult Board::RotateClockwize() {
-	return MergeResult_Conflict;
-}
+void Board::RotateCurrentMatrix(RotateDirection direction) {
+	ArrayTetrimonos4x4 source;
+	std::copy(begin(m_current), end(m_current), begin(source));
 
-MergeResult Board::RotateAntiClockwize() {
-	return MergeResult_Conflict;
+	if (direction == RotateDirection_Clockwize) {
+		for (int y = 0; y < MAX_TETRIMONO_HEIGHT; y++) {
+			for (int x = 0; x < MAX_TETRIMONO_WIDTH; x++) {
+				m_current[y][x] = source[x][MAX_TETRIMONO_HEIGHT - y - 1];
+			}
+		}
+	} else {
+		for (int y = 0; y < MAX_TETRIMONO_HEIGHT; y++) {
+			for (int x = 0; x < MAX_TETRIMONO_WIDTH; x++) {
+				m_current[y][x] = source[MAX_TETRIMONO_WIDTH - x - 1][y];
+			}
+		}
+	}
+
+	FindBoundsFor(m_current, m_currentStartX, m_currentStartY, m_currentEndX, m_currentEndY);
 }

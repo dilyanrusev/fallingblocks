@@ -29,6 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "stdafx.h"
 #include "Com.h"
+#include <cassert>
 
 Com::Com()
 		: m_initialized(false) {

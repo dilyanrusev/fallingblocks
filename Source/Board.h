@@ -50,16 +50,21 @@ enum MergeResult {
 	MergeResult_OK
 };
 
+enum RotateDirection {
+	RotateDirection_Clockwize,
+	RotateDirection_AntiClockwize
+};
+
 class Board {
 public:
 	Board();
 	~Board();
 
-	void Update(float ms);
-	MergeResult SpawnNext();
+	void Update(float ms);	
 	MergeResult MoveCurrent(int deltaX, int deltaY);
-	MergeResult RotateClockwize();
-	MergeResult RotateAntiClockwize();
+	MergeResult Rotate(RotateDirection direction);	
+	void FallDown();
+	
 	inline Tetrimonos GetAt(int x, int y) const {
 		return m_matrix[y][x];
 	}
@@ -83,14 +88,15 @@ private:
 	Board& operator=(const Board&);
 
 	void Spawn(Tetrimonos type);
+	MergeResult SpawnNext();
 	void GetMatrixFor(Tetrimonos type, ArrayTetrimonos4x4& matrix, int& startX, int& endX, int& startY, int& endY) const;
 	void GetMatrixFor(Tetrimonos type, ArrayTetrimonos4x4& matrix) const;
 	void Empty(ArrayTetrimonos4x4& matrix) const;
 	void Empty(ArrayTetrimonos10x20& matrix) const;
 	void RemoveCurrentFromMatrix(ArrayTetrimonos10x20& matrix) const;
 	MergeResult MergeCurrent(ArrayTetrimonos10x20& result) const;
-	void RotateCurrentMatrixClockwize(ArrayTetrimonos4x4& result, int& startX, int& endX, int& startY, int& endY) const;
-	void RotateCurrentMatrixAntiClockwize(ArrayTetrimonos4x4& result, int& startX, int& endX, int& startY, int& endY) const;
+	void RotateCurrentMatrix(RotateDirection direction);
+	void FindBoundsFor(const ArrayTetrimonos4x4& figure, int& startX, int& startY, int& endX, int& endY) const;
 	void FindBorders(const ArrayTetrimonos4x4& matrix, int& startX, int& endX, int& startY, int& endY) const;
 	
 	int m_currentX;
