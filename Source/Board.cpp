@@ -57,7 +57,7 @@ Board::Board()
 		, m_currentType(Tetrimono_Empty)
 		, m_nextType(Tetrimono_Empty)
 		, m_elapsedSinceLastFall(0)
-		, m_timeBetweenFall(500)
+		, m_timeBetweenFall(1000)
 		, m_isGameOver(false)
 		, m_isFirstFallAfterSpawn(true)
 		, m_randomDistributor(Tetrimono_I, Tetrimono_Z) {	
@@ -76,22 +76,24 @@ void Board::Update(float ms) {
 	}
 
 	m_elapsedSinceLastFall += ms;
-	//Log("elaped = %f; ms = %f\n", m_elapsedSinceLastFall, ms);
-	if (m_elapsedSinceLastFall >= m_timeBetweenFall) {
-		m_elapsedSinceLastFall = 0;		
-		MergeResult fallResult = MoveCurrent(0, 1);
-		if (fallResult == MergeResult_Conflict) {
-			if (!m_isFirstFallAfterSpawn) {
-				SpawnNext();
-				m_isFirstFallAfterSpawn = true;
-			}
-			else {
-				m_isGameOver = true;
-			}
-		} else {
-			m_isFirstFallAfterSpawn = false;
-		}
+	if (m_elapsedSinceLastFall < m_timeBetweenFall) {
+		return;
 	}
+	
+	m_elapsedSinceLastFall = 0;		
+	MergeResult fallResult = MoveCurrent(0, 1);
+	if (fallResult == MergeResult_Conflict) {
+		if (!m_isFirstFallAfterSpawn) {
+			SpawnNext();
+			m_isFirstFallAfterSpawn = true;
+		}
+		else {
+			m_isGameOver = true;
+		}
+	} else {
+		m_isFirstFallAfterSpawn = false;
+	}
+	
 }
 
 void Board::FallDown() {
