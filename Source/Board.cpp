@@ -70,7 +70,8 @@ Board::Board()
 		, m_timeBetweenFall(1000)
 		, m_isGameOver(false)
 		, m_isFirstFallAfterSpawn(true)
-		, m_randomGenerator(std::chrono::system_clock::now().time_since_epoch().count())
+		, m_randomGenerator(static_cast<unsigned int>(
+			std::chrono::system_clock::now().time_since_epoch().count()))
 		, m_randomDistributor(Tetrimono_I, Tetrimono_Z) {	
 	Empty(m_matrix);
 	m_nextType = static_cast<Tetrimonos>(m_randomDistributor(m_randomGenerator));

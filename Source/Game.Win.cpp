@@ -37,6 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileFontCollectionLoader.h"
 #include <cassert>
 #include <algorithm>
+#include <string>
 
 using namespace std;
 using Microsoft::WRL::ComPtr;
@@ -80,14 +81,18 @@ struct Game::Impl {
 	HINSTANCE m_instance;
 	LARGE_INTEGER m_perfFrequency;
 	Board m_board;
-	D2D1_POINT_2F m_boardPos;
+	D2D1_POINT_2F m_boardPos;	
+	
+	ComPtr<ID2D1Bitmap> m_terimonoBitmaps[Count_Tetrimonos];
+	ComPtr<ID2D1Brush> m_testBrush;
+	ComPtr<ID2D1HwndRenderTarget> m_renderTarget;
 	ComPtr<ID2D1Factory> m_drawFactory;
+
+	ComPtr<IDWriteTextFormat> m_textFormat;
+	ComPtr<IDWriteFontCollection> m_fontCollection;
+	ComPtr<IDWriteFontCollectionLoader> m_fontLoader;
 	ComPtr<IDWriteFactory> m_writeFactory;
 	ComPtr<IWICImagingFactory> m_imageFactory;
-	ComPtr<ID2D1HwndRenderTarget> m_renderTarget;
-	ComPtr<IDWriteFontCollectionLoader> m_fontLoader;
-	ComPtr<ID2D1Brush> m_testBrush;
-	ComPtr<ID2D1Bitmap> m_terimonoBitmaps[Count_Tetrimonos];
 };
 
 Game::Impl::Impl(Game* parent) 
@@ -148,6 +153,15 @@ void Game::Impl::InitGraphicsSystems() {
 	hr = m_writeFactory->RegisterFontCollectionLoader(m_fontLoader.Get());
 	assert(SUCCEEDED(hr));
 	m_isFontLoaderRegistered = true;
+
+	hr = m_writeFactory->CreateCustomFontCollection(m_fontLoader.Get(), L"Assets", 7 * sizeof(wchar_t),
+		m_fontCollection.GetAddressOf());
+	assert(SUCCEEDED(hr));
+
+	hr = m_writeFactory->CreateTextFormat(L"Ubuntu", m_fontCollection.Get(),
+		DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+		30, L"en-US", m_textFormat.GetAddressOf());
+	assert(SUCCEEDED(hr));
 
 	hr = ::D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, IID_PPV_ARGS(&m_drawFactory));
 	assert(SUCCEEDED(hr));
@@ -265,6 +279,23 @@ void Game::Impl::Render() {
 			m_renderTarget->DrawBitmap(bitmap.Get(), &dest, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
 		}
 	}
+
+	std::wstring score(L"Score: ");
+	score += ::to_wstring(m_board.GetScore());
+	std::wstring level(L"Level: ");
+	level += to_wstring(m_board.GetLevel());
+
+	const int X = 250;
+	const int Y = 0;
+	const int W = 200;
+	const int H = 20;
+	const int LS = 10;
+
+	D2D1_RECT_F scoreRect = { X, Y, X + W, Y + H };
+	D2D1_RECT_F levelRect = { X, Y + LS + H, X + W, Y + LS + H + H };
+
+	m_renderTarget->DrawText(score.c_str(), static_cast<UINT32>(score.size()), m_textFormat.Get(), &scoreRect, m_testBrush.Get());
+	m_renderTarget->DrawText(level.c_str(), static_cast<UINT32>(level.size()), m_textFormat.Get(), &levelRect, m_testBrush.Get());
 
 	if (m_renderTarget->EndDraw() == D2DERR_RECREATE_TARGET) {
 		CleanDeviceResources();
