@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Game.h"
 #include "Board.h"
+#include "FileFontCollectionLoader.h"
 #include <cassert>
 #include <algorithm>
 
@@ -74,6 +75,7 @@ struct Game::Impl {
 	Game* m_parent;
 	RECT m_clientRect;
 	bool m_isClassRegistered;
+	bool m_isFontLoaderRegistered;
 	HWND m_window;
 	HINSTANCE m_instance;
 	LARGE_INTEGER m_perfFrequency;
@@ -83,6 +85,7 @@ struct Game::Impl {
 	ComPtr<IDWriteFactory> m_writeFactory;
 	ComPtr<IWICImagingFactory> m_imageFactory;
 	ComPtr<ID2D1HwndRenderTarget> m_renderTarget;
+	ComPtr<IDWriteFontCollectionLoader> m_fontLoader;
 	ComPtr<ID2D1Brush> m_testBrush;
 	ComPtr<ID2D1Bitmap> m_terimonoBitmaps[Count_Tetrimonos];
 };
@@ -96,11 +99,15 @@ Game::Impl::Impl(Game* parent)
 		, BLOCK_HEIGHT(35)
 		, m_parent(parent)
 		, m_isClassRegistered(false)
+		, m_isFontLoaderRegistered(false)
 		, m_window(nullptr)
 		, m_instance(nullptr) {
 }
 
 Game::Impl::~Impl() {
+	if (m_isFontLoaderRegistered) {
+		m_writeFactory->UnregisterFontCollectionLoader(m_fontLoader.Get());
+	}
 	if (m_isClassRegistered && m_instance) {
 		::UnregisterClass(APP_CLASS, m_instance);
 	}
@@ -136,6 +143,11 @@ void Game::Impl::InitGraphicsSystems() {
 	hr = ::DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(m_writeFactory), 
 		reinterpret_cast<IUnknown**>(m_writeFactory.GetAddressOf()));
 	assert(SUCCEEDED(hr));
+
+	m_fontLoader = new FileFontCollectionLoader();
+	hr = m_writeFactory->RegisterFontCollectionLoader(m_fontLoader.Get());
+	assert(SUCCEEDED(hr));
+	m_isFontLoaderRegistered = true;
 
 	hr = ::D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, IID_PPV_ARGS(&m_drawFactory));
 	assert(SUCCEEDED(hr));

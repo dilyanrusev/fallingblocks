@@ -23,6 +23,9 @@ public:
 	STDMETHOD(MoveNext)(BOOL* hasCurrentFile) override;
 
 private:
+	FileFontCollectionLoader(const FileFontCollectionLoader&);
+	FileFontCollectionLoader& operator=(const FileFontCollectionLoader&);
+
 	ULONG m_refCount;
 	std::vector<std::wstring> m_fontFiles;
 	int m_currentFileIndex;
