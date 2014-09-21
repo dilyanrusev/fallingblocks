@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 FileFontCollectionLoader::FileFontCollectionLoader()
-		: m_refCount(1)
+		: m_refCount(0)
 		, m_currentFileIndex(-1)
 		, m_factory(nullptr) {
 }
