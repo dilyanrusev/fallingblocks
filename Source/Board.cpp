@@ -50,9 +50,10 @@ const int Board::WIDTH = 10;
 const int Board::HEIGHT = 20;
 const int Board::MAX_TETRIMONO_WIDTH = 4;
 const int Board::MAX_TETRIMONO_HEIGHT = 4;
-const int Board::SCORE_BETWEEN_LEVELS = 1000;
+const int Board::SCORE_BETWEEN_LEVELS = 500;
 const int Board::SCORE_PER_LINE = 100;
 const int Board::SCORE_BONUS_PER_CONSEQUTIVE_LINE = 50;
+const float Board::ORIGINAL_SPEED = 1000;
 
 Board::Board()
 		: m_score(0)
@@ -67,7 +68,7 @@ Board::Board()
 		, m_currentType(Tetrimono_Empty)
 		, m_nextType(Tetrimono_Empty)
 		, m_elapsedSinceLastFall(0)
-		, m_timeBetweenFall(1000)
+		, m_timeBetweenFall(ORIGINAL_SPEED)
 		, m_isGameOver(false)
 		, m_isFirstFallAfterSpawn(true)
 		, m_randomGenerator(static_cast<unsigned int>(
@@ -161,6 +162,7 @@ void Board::AdaptForRemovedLines(RemovedLinesStats removedStats) {
 	if (m_scoreUntilNextLevel <= 0) {
 		m_level++;
 		m_scoreUntilNextLevel = SCORE_BETWEEN_LEVELS + m_scoreUntilNextLevel;
+		m_timeBetweenFall *= 0.8f;
 	}
 }
 

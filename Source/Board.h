@@ -90,6 +90,7 @@ private:
 	static const int SCORE_BETWEEN_LEVELS;
 	static const int SCORE_PER_LINE;
 	static const int SCORE_BONUS_PER_CONSEQUTIVE_LINE;
+	static const float ORIGINAL_SPEED;
 
 	typedef std::array < std::array<Tetrimonos, 4>, 4 > ArrayTetrimonos4x4;
 	typedef std::array < std::array<Tetrimonos, 10>, 20 > ArrayTetrimonos10x20;
