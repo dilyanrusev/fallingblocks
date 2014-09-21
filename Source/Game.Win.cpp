@@ -159,7 +159,7 @@ void Game::Impl::InitGraphicsSystems() {
 	assert(SUCCEEDED(hr));
 
 	hr = m_writeFactory->CreateTextFormat(L"Ubuntu", m_fontCollection.Get(),
-		DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+		DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
 		30, L"en-US", m_textFormat.GetAddressOf());
 	assert(SUCCEEDED(hr));
 
@@ -289,7 +289,7 @@ void Game::Impl::Render() {
 	const int Y = 0;
 	const int W = 200;
 	const int H = 20;
-	const int LS = 10;
+	const int LS = 15;
 
 	D2D1_RECT_F scoreRect = { X, Y, X + W, Y + H };
 	D2D1_RECT_F levelRect = { X, Y + LS + H, X + W, Y + LS + H + H };
@@ -313,7 +313,7 @@ void Game::Impl::CreateDeviceResources() {
 
 	Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> solidBrush;
 	assert(SUCCEEDED(
-		m_renderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), &solidBrush)
+		m_renderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &solidBrush)
 		));
 	solidBrush.As(&m_testBrush);
 
