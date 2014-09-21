@@ -30,10 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include <dwrite.h>
-#include <vector>
-#include <string>
 
-class FileFontCollectionLoader : public IDWriteFontCollectionLoader, public IDWriteFontFileEnumerator {
+class FileFontCollectionLoader : public IDWriteFontCollectionLoader  {
 public:
 	FileFontCollectionLoader();
 	virtual ~FileFontCollectionLoader();
@@ -47,17 +45,12 @@ public:
 	STDMETHOD(CreateEnumeratorFromKey)(IDWriteFactory* factory, const void* collectionKey,
 		UINT32 collectionKeySize, IDWriteFontFileEnumerator** fontFileEnumerator) override;
 
-	// IDWriteFontFileEnumerator
-	STDMETHOD(GetCurrentFontFile)(IDWriteFontFile** fontFile) override;
-	STDMETHOD(MoveNext)(BOOL* hasCurrentFile) override;
+	
 
 private:
 	FileFontCollectionLoader(const FileFontCollectionLoader&);
 	FileFontCollectionLoader& operator=(const FileFontCollectionLoader&);
 
-	ULONG m_refCount;
-	std::vector<std::wstring> m_fontFiles;
-	int m_currentFileIndex;
-	IDWriteFactory* m_factory;
+	ULONG m_refCount;	
 };
 
