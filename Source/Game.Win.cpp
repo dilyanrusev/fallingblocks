@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef WIN32
 
 #include "Game.h"
-#include"Board.h"
+#include "Board.h"
 #include <cassert>
 #include <algorithm>
 
@@ -360,8 +360,7 @@ LRESULT Game::Impl::OnKeyDown(int vk) {
 	case VK_UP:
 		m_board.Rotate(RotateDirection_Clockwize); break;
 	case VK_DOWN:
-		m_board.MoveCurrent(0, 1); break;
-		 break;
+		m_board.MoveCurrent(0, 1); break;		 
 	case VK_SPACE:
 		m_board.FallDown(); break;
 	case VK_ESCAPE:

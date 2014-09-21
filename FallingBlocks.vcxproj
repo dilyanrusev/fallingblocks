@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\FileFontCollectionLoader.cpp" />
     <ClCompile Include="Source\Game.Win.cpp" />
     <ClCompile Include="Source\Log.cpp" />
     <ClCompile Include="Source\Board.cpp" />
@@ -26,6 +27,7 @@
     <ClCompile Include="Source\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\FileFontCollectionLoader.h" />
     <ClInclude Include="Source\Log.h" />
     <ClInclude Include="Source\Board.h" />
     <ClInclude Include="Source\Com.h" />
