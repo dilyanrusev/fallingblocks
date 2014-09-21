@@ -51,6 +51,7 @@ HRESULT FileFontCollectionLoader::CreateEnumeratorFromKey(IDWriteFactory* factor
 	m_factory = factory;
 	m_factory->AddRef();
 
+	m_currentFileIndex = -1;
 	m_fontFiles.clear();	
 	WIN32_FIND_DATA fd;
 	HANDLE handle = ::FindFirstFile(reinterpret_cast<const wchar_t*>(collectionKey), &fd);
@@ -67,9 +68,20 @@ HRESULT FileFontCollectionLoader::CreateEnumeratorFromKey(IDWriteFactory* factor
 }
 
 HRESULT FileFontCollectionLoader::MoveNext(BOOL* hasCurrentFile) {
-	return E_NOTIMPL;
+	if (!hasCurrentFile) return E_POINTER;
+
+	m_currentFileIndex++;
+	*hasCurrentFile = m_currentFileIndex < m_fontFiles.size();
+
+	return S_OK;
 }
 
 HRESULT FileFontCollectionLoader::GetCurrentFontFile(IDWriteFontFile** fontFile) {
-	return E_NOTIMPL;
+	if (!fontFile) return E_POINTER;
+	if (!m_factory) return E_FAIL;
+
+	HRESULT hr = m_factory->CreateFontFileReference(m_fontFiles[m_currentFileIndex].c_str(),
+		nullptr, fontFile);
+
+	return hr;
 }
