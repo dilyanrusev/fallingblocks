@@ -41,6 +41,8 @@ HRESULT FileFontCollectionLoader::QueryInterface(REFIID riid, void** ppvObject) 
 
 HRESULT FileFontCollectionLoader::CreateEnumeratorFromKey(IDWriteFactory* factory, const void* collectionKey,
 		UINT32 collectionKeySize, IDWriteFontFileEnumerator** fontFileEnumerator) {
+	UNREFERENCED_PARAMETER(collectionKeySize);
+
 	if (!fontFileEnumerator) return E_POINTER;
 	
 	if (m_factory) {
@@ -49,7 +51,15 @@ HRESULT FileFontCollectionLoader::CreateEnumeratorFromKey(IDWriteFactory* factor
 	m_factory = factory;
 	m_factory->AddRef();
 
-	wchar_t path[MAX_PATH];
+	m_fontFiles.clear();	
+	WIN32_FIND_DATA fd;
+	HANDLE handle = ::FindFirstFile(reinterpret_cast<const wchar_t*>(collectionKey), &fd);
+	if (handle != INVALID_HANDLE_VALUE) {
+		do {
+			m_fontFiles.push_back(std::wstring(fd.cFileName));
+		} while (::FindNextFile(handle, &fd));
+		::FindClose(handle);
+	}
 
 	AddRef();
 	*fontFileEnumerator = this;

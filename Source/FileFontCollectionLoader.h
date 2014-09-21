@@ -24,7 +24,7 @@ public:
 
 private:
 	ULONG m_refCount;
-	std::vector<std::string> m_fontFiles;
+	std::vector<std::wstring> m_fontFiles;
 	int m_currentFileIndex;
 	IDWriteFactory* m_factory;
 };
